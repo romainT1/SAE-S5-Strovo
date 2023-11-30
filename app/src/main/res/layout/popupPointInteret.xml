@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Boite de dialogue permettant d'appliquer des filtres sur une
+    recherche de course -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/titrePointInteret"
+        android:textAlignment="center"
+        />
+
+    <EditText
+        android:id="@+id/inputLibelle"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:inputType="time"
+        android:hint="@string/inputLibelle" />
+
+    <EditText
+        android:id="@+id/inputDescription"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:inputType="time"
+        android:hint="@string/inputDescription" />
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/confirmer"/>
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/annuler"/>
+
+</LinearLayout>
