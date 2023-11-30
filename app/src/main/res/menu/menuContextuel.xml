@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- menu contextuel qui permet de modifier / supprimer une course :
+     modification, suppression d'une course
+     -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/modifier"
+        android:title="@string/modifier" />
+    <item
+        android:id="@+id/supprimer"
+        android:title="@string/supprimer" />
+    <item
+        android:id="@+id/retour"
+        android:title="@string/retour" />
+</menu>

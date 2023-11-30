@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">Strovo</string>
+
+    <!-- Menus Modification -->
+    <string name="modifier">Modifier description</string>
+    <string name="supprimer">Supprimer</string>
+    <string name="retour">Retour</string>
+
+    <!-- Popup filtre -->
+    <string name="titreFiltres">Filtres</string>
+    <string name="inputMois">Mois</string>
+    <string name="inputDureeMin">Durée minimale</string>
+    <string name="inputDureeMax">Durée maximale</string>
+    <string name="rechercher">Rechercher</string>
+
+    <!-- Popup lancer course -->
+    <string name="titreLancerCourse">Etes vous sûr de vouloir lancer une course ?</string>
+    <string name="inputCommentaire">Commentaire</string>
+
+    <!-- Popup point d'interet -->
+    <string name="titrePointInteret">Point d’interet</string>
+    <string name="inputLibelle">Libellé</string>
+    <string name="inputDescription">Description</string>
+
+    <!-- Popup boutons communs-->
+    <string name="confirmer">Confirmer</string>
+    <string name="annuler">Annuler</string>
+
 </resources>
