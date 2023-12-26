@@ -8,9 +8,12 @@
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher_background"
-        android:layout_marginBottom="50dp"/>
+        android:layout_height="120dp"
+        android:layout_marginBottom="50dp"
+        android:adjustViewBounds="false"
+        android:cropToPadding="true"
+        android:src="@drawable/logo" />
+
     <EditText
         android:id="@+id/email"
         android:layout_width="match_parent"
