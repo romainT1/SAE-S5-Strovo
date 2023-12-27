@@ -7,9 +7,9 @@
     android:layout_margin="25dp">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher_background"
+        android:layout_width="166dp"
+        android:layout_height="223dp"
+        android:src="@drawable/logo"
         android:layout_marginBottom="50dp"/>
     <EditText
         android:id="@+id/prenom"

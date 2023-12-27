@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="25dp">
+
+    <org.osmdroid.views.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/mapView">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/timeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="02h51m"/>
+
+            <TextView
+                android:id="@+id/distanceTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25"/>
+
+            <TextView
+                android:id="@+id/speedTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="13km/h"/>
+
+            <TextView
+                android:id="@+id/ascentTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="56km"/>
+
+            <TextView
+                android:id="@+id/descentTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="79"/>
+
+            <Button
+                android:id="@+id/floating_home_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Retourner à l'accueil" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
