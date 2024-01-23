@@ -1,6 +1,5 @@
 package fr.gr3.strovo;
 
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
