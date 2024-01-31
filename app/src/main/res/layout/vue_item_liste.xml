@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/test"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/nom_parcours"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="80" />
+    <!-- pour afficher le montant du frais -->
+    <TextView
+        android:id="@+id/date_heure"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="20" />
+</LinearLayout>
