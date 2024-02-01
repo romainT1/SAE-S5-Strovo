@@ -29,25 +29,28 @@ public class Accueil extends AppCompatActivity {
         listView = findViewById(R.id.list_view);
         floatingActionButton = findViewById(R.id.floating_action_button);
 
-        ArrayList<String> listItems = new ArrayList<>();
-        listItems.add("\n1er parcours \n12/12/2023 18:00\n");
-        listItems.add("\n2e parcours \n13/12/2023 18:00\n");
-        listItems.add("\n3e parcours \n14/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
-        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+        ArrayList<Parcours> listItems = new ArrayList<>();
+        listItems.add(new Parcours("parcours1","12/12/2023 18:00"));
+        listItems.add(new Parcours("parcours2","12/12/2023 18:00"));
+        listItems.add(new Parcours("parcours3","12/12/2023 18:00"));
+//        listItems.add("\n1er parcours \n12/12/2023 18:00\n");
+//        listItems.add("\n2e parcours \n13/12/2023 18:00\n");
+//        listItems.add("\n3e parcours \n14/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
+//        listItems.add("\n5e parcours \n15/12/2023 18:00\n");
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listItems);
+        ParcoursAdapter adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, listItems);
         listView.setAdapter(adapter);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
