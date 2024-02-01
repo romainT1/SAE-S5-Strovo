@@ -3,17 +3,21 @@
     android:id="@+id/test"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp">
 
     <TextView
         android:id="@+id/nom_parcours"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="80" />
+        android:layout_weight="80"
+        android:textSize="20sp"/>
     <!-- pour afficher le montant du frais -->
     <TextView
         android:id="@+id/date_heure"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="20" />
+        android:layout_weight="20"
+        android:textSize="20sp"/>
 </LinearLayout>
