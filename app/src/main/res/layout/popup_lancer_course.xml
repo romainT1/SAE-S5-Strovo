@@ -6,6 +6,25 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/titreLancerCourse"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/inputCommentaire"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="@string/inputCommentaire"
+        android:inputType="text"
+        android:maxLength="35"
+        android:maxLines="1" />
+
     <Button
         android:id="@+id/confirmer"
         android:layout_width="match_parent"
@@ -26,22 +45,6 @@
         app:strokeColor="#F44336"
         app:strokeWidth="3px" />
 
-    <EditText
-        android:id="@+id/inputCommentaire"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:hint="@string/inputCommentaire"
-        android:inputType="text"
-        android:maxLength="35"
-        android:maxLines="1" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/titreLancerCourse"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textStyle="bold" />
 
 </LinearLayout>
