@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Boite de dialogue permettant d'appliquer des filtres sur une
+git<?xml version="1.0" encoding="utf-8"?><!-- Boite de dialogue permettant d'appliquer des filtres sur une
     recherche de course -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -8,6 +8,34 @@
     android:minWidth="300dp"
     android:orientation="vertical"
     android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/titreFiltres"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/inputDureeMax"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="@string/inputDureeMax"
+        android:inputType="time" />
+
+    <EditText
+        android:id="@+id/inputDureeMin"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="@string/inputDureeMin"
+        android:inputType="time" />
+
+    <EditText
+        android:id="@+id/inputMois"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="@string/inputMois"
+        android:inputType="date" />
+
 
     <Button
         android:id="@+id/btnRechercher"
@@ -25,32 +53,5 @@
         android:textColor="#F44336"
         app:strokeColor="#F44336"
         app:strokeWidth="3px" />
-
-    <EditText
-        android:id="@+id/inputDureeMax"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="@string/inputDureeMax"
-        android:inputType="time" />
-
-    <EditText
-        android:id="@+id/inputMois"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="@string/inputMois"
-        android:inputType="date" />
-
-    <EditText
-        android:id="@+id/inputDureeMin"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="@string/inputDureeMin"
-        android:inputType="time" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/titreFiltres"
-        android:textAlignment="center" />
 
 </LinearLayout>
