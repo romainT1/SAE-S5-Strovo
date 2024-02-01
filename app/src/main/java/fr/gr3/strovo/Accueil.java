@@ -1,12 +1,16 @@
 package fr.gr3.strovo;
 
 import androidx.appcompat.widget.SearchView;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.app.Dialog;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -70,8 +74,42 @@ public class Accueil extends AppCompatActivity {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Gérez le clic sur le bouton de filtre ici
+                // Crée une instance de Dialog
+                final Dialog dialog = new Dialog(Accueil.this);
+
+                // Définis le contenu de la fenêtre contextuelle
+                dialog.setContentView(R.layout.popup_filtre);
+
+                // Récupère les éléments de la fenêtre contextuelle
+                EditText inputMois = dialog.findViewById(R.id.inputMois);
+                EditText inputDureeMin = dialog.findViewById(R.id.inputDureeMin);
+                EditText inputDureeMax = dialog.findViewById(R.id.inputDureeMax);
+
+                Button rechercher = dialog.findViewById(R.id.btnRechercher);
+                Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+                // Gère le clic sur le bouton "rechercher"
+                rechercher.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO faire le lien a l'api
+                        dialog.dismiss();
+                    }
+                });
+
+                // Gérez le clic sur le bouton "Annuler"
+                annuler.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Gérez le clic sur le bouton "Annuler" ici
+                        dialog.dismiss();
+                    }
+                });
+
+                // Affichez la fenêtre contextuelle
+                dialog.show();
             }
+
         });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -84,7 +122,39 @@ public class Accueil extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Gérez le clic sur le bouton d'action flottant ici
+                // Créez une instance de Dialog
+                final Dialog dialog = new Dialog(Accueil.this);
+
+                // Définissez le contenu de la fenêtre contextuelle
+                dialog.setContentView(R.layout.popup_lancer_course);
+
+                // Récupérez les éléments de la fenêtre contextuelle
+                EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
+                Button confirmer = dialog.findViewById(R.id.confirmer);
+                Button annuler = dialog.findViewById(R.id.annuler);
+
+                // Gérez le clic sur le bouton "Confirmer"
+                confirmer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Gérez le clic sur le bouton "Confirmer" ici
+                        Intent intent = new Intent(Accueil.this, MapActivity.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+                });
+
+                // Gérez le clic sur le bouton "Annuler"
+                annuler.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Gérez le clic sur le bouton "Annuler" ici
+                        dialog.dismiss();
+                    }
+                });
+
+                // Affichez la fenêtre contextuelle
+                dialog.show();
             }
         });
     }

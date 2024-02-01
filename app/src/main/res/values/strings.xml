@@ -21,6 +21,8 @@
     <string name="titrePointInteret">Point d’interet</string>
     <string name="inputLibelle">Libellé</string>
     <string name="inputDescription">Description</string>
+    <string name="ajouterPointInteret">Ajouter un point d\'interet</string>
+    <string name="arreter">Arreter</string>
 
     <!-- Popup boutons communs-->
     <string name="confirmer">Confirmer</string>

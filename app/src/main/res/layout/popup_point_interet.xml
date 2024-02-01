@@ -1,41 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Boite de dialogue permettant d'appliquer des filtres sur une
-    recherche de course -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:minWidth="300dp"
+    android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/titrePointInteret"
         android:textAlignment="center"
-        />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
     <EditText
         android:id="@+id/inputLibelle"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:inputType="time"
-        android:hint="@string/inputLibelle" />
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="@string/inputLibelle"
+        android:layout_marginTop="16dp" />
 
     <EditText
         android:id="@+id/inputDescription"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:inputType="time"
-        android:hint="@string/inputDescription" />
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:hint="@string/inputDescription"
+        android:layout_marginTop="16dp" />
 
     <Button
-        android:layout_height="wrap_content"
+        android:id="@+id/confirmer"
         android:layout_width="match_parent"
-        android:text="@string/confirmer"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#F44336"
+        android:text="@string/confirmer"
+        android:textColor="#FFFFFF" />
 
     <Button
-        android:layout_height="wrap_content"
+        android:id="@+id/annuler"
         android:layout_width="match_parent"
-        android:text="@string/annuler"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#00C60F02"
+        android:text="@string/annuler"
+        android:textColor="#F44336"
+        app:strokeColor="#F44336"
+        app:strokeWidth="3px" />
 
 </LinearLayout>
