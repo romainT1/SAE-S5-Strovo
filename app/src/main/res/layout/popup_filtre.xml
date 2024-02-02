@@ -1,4 +1,4 @@
-git<?xml version="1.0" encoding="utf-8"?><!-- Boite de dialogue permettant d'appliquer des filtres sur une
+<?xml version="1.0" encoding="utf-8"?><!-- Boite de dialogue permettant d'appliquer des filtres sur une
     recherche de course -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
