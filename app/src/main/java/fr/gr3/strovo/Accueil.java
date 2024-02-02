@@ -25,7 +25,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -57,6 +59,15 @@ public class Accueil extends AppCompatActivity {
     /** Adaptateur pour la liste des parcours */
     private ParcoursAdapter adapter;
 
+    /** Identifiant de l'utilisateur */
+    private int userId;
+
+    /** Nom du parcours */
+    private String nameParcours;
+
+    /** Intervalle des dates des parcours */
+    private Date[] dateIntervalle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,15 +85,22 @@ public class Accueil extends AppCompatActivity {
         adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
         listViewParcours.setAdapter(adapter);
 
+        // Récupération des informations de recherche de parcours
+        //TODO : récupérer l'id de l'utilisateur et autres avec les préférences
+        userId = 1;
+        nameParcours = null;
+        dateIntervalle = null;
+
         // Appelle la méthode pour récupérer les données de l'API
-        fetchParcoursFromApi();
+        fetchParcoursFromApi(userId, nameParcours, dateIntervalle);
 
         // Configuration de l'écouteur de la barre de recherche
         rechercheNom.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String nameParcours) {
-
-                return false;
+            public boolean onQueryTextSubmit(String rechercheNomParcours) {
+                rechercheNomParcours = rechercheNomParcours.replace(" ", "+");
+                fetchParcoursFromApi(userId, rechercheNomParcours, dateIntervalle);
+                return true;
             }
 
             @Override
@@ -182,12 +200,23 @@ public class Accueil extends AppCompatActivity {
 
     /**
      * Récupère les données des parcours depuis l'API en utilisant la bibliothèque Volley.
+     * @param userId Identifiant de l'utilisateur
+     * @param nameParcours Nom du parcours à rechercher
+     * @param dateIntervalle Intervalle de date dont on veut les parcours
      */
-    private void fetchParcoursFromApi() {
-        // TODO Récupérer l'identifiant de l'utilisateur
-        int userId = 1;
-        String.format(URL_LISTE_PARCOURS, userId);
-        String apiUrl = "http://172.20.10.14:8080/parcours/utilisateur/1";
+    private void fetchParcoursFromApi(int userId, String nameParcours, Date[] dateIntervalle) {
+        String urlModifie = URL_LISTE_PARCOURS;
+        String apiUrl = String.format(urlModifie, userId);
+
+        if (nameParcours != null && !nameParcours.equals("")) {
+            apiUrl += "?nom=%s";
+            apiUrl = String.format(apiUrl, nameParcours);
+        }
+
+        if (dateIntervalle != null) {
+            apiUrl += "?dateDebut=%s?dateFin=%s";
+            apiUrl = String.format(apiUrl, dateIntervalle[0], dateIntervalle[1]);
+        }
 
         // Utilisation de la bibliothèque Volley pour effectuer la requête HTTP
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -217,12 +246,14 @@ public class Accueil extends AppCompatActivity {
      * @param response Un objet de type JSONArray
      */
     private void parseJsonResponse(JSONArray response) {
+        parcoursList.clear();
         for (int i = 0; i < response.length(); i++) {
             try {
                 JSONObject parcoursJson = response.getJSONObject(i);
                 Parcours parcours = new Parcours(parcoursJson.getString("name"),
                                                  parcoursJson.getString("date"));
-                parcoursList.add(parcours);
+                //parcoursList.add(parcours);
+                adapter.add(parcours);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
