@@ -29,4 +29,9 @@
     <string name="confirmer">Confirmer</string>
     <string name="annuler">Annuler</string>
 
+    <!-- Popup modif parcours-->
+    <string name="modifParcours">Modifier le parcours</string>
+
+
+
 </resources>

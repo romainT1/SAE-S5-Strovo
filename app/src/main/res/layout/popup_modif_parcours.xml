@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Boite de dialogue permettant d'appliquer des filtres sur une
+    recherche de course -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minWidth="300dp"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/modifParcours"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+
+    <Button
+        android:id="@+id/btnRechercher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/rechercher" />
+
+
+    <Button
+        android:id="@+id/btnSupprimer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/supprimer" />
+
+    <Button
+        android:id="@+id/btnAnnuler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#00C60F02"
+        android:text="@string/annuler"
+        android:textColor="#F44336"
+        app:strokeColor="#F44336"
+        app:strokeWidth="3px" />
+
+</LinearLayout>
