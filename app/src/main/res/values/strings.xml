@@ -16,6 +16,7 @@
     <!-- Popup lancer course -->
     <string name="titreLancerCourse">Etes vous sûr de vouloir lancer une course ?</string>
     <string name="inputCommentaire">Commentaire</string>
+    <string name="inputNom">Nom</string>
 
     <!-- Popup point d'interet -->
     <string name="titrePointInteret">Point d’interet</string>

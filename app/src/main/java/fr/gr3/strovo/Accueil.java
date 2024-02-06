@@ -23,6 +23,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -46,6 +47,9 @@ public class Accueil extends AppCompatActivity {
 
     /** URL de l'API pour récupérer la liste des parcours de l'utilisateur */
     private final String URL_LISTE_PARCOURS = "http://172.20.10.14:8080/parcours/utilisateur/%d";
+
+    /** URL de l'API pour ajouter un parcours */
+    private final String URL_ADD_PARCOURS = "http://172.20.10.14:8080/parcours";
 
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
@@ -78,10 +82,14 @@ public class Accueil extends AppCompatActivity {
     /** Intervalle des dates des parcours */
     private Date[] dateIntervalle;
 
+    /** Queue pour effectuer la requête HTTP */
+    RequestQueue requestQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
+
+        requestQueue = Volley.newRequestQueue(this);
 
         // Affectation des composants graphiques
         rechercheNom = findViewById(R.id.search_view);
@@ -208,6 +216,8 @@ public class Accueil extends AppCompatActivity {
 
                 // Récupére les éléments de la fenêtre contextuelle
                 EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
+                EditText inputName = dialog.findViewById(R.id.inputNom);
+
                 Button confirmer = dialog.findViewById(R.id.confirmer);
                 Button annuler = dialog.findViewById(R.id.annuler);
 
@@ -215,6 +225,9 @@ public class Accueil extends AppCompatActivity {
                 confirmer.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
+                        addParcoursFromApi(parcours);
+
                         Intent intent = new Intent(Accueil.this, MapActivity.class);
                         startActivity(intent);
                         dialog.dismiss();
@@ -256,8 +269,6 @@ public class Accueil extends AppCompatActivity {
             apiUrl = String.format(apiUrl, dateIntervalle[0].getTime(), dateIntervalle[1].getTime());
         }
 
-        // Utilisation de la bibliothèque Volley pour effectuer la requête HTTP
-        RequestQueue queue = Volley.newRequestQueue(this);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
                 apiUrl,
@@ -276,7 +287,7 @@ public class Accueil extends AppCompatActivity {
                 });
 
         // Ajoute la requête à la file d'attente
-        queue.add(jsonArrayRequest);
+        requestQueue.add(jsonArrayRequest);
     }
 
     /**
@@ -290,7 +301,8 @@ public class Accueil extends AppCompatActivity {
             try {
                 JSONObject parcoursJson = response.getJSONObject(i);
                 Parcours parcours = new Parcours(parcoursJson.getString("name"),
-                                                 parcoursJson.getString("date"));
+                                                 parcoursJson.getString("date"),
+                                                 parcoursJson.getString("description"));
                 //parcoursList.add(parcours);
                 adapter.add(parcours);
             } catch (JSONException e) {
@@ -299,6 +311,48 @@ public class Accueil extends AppCompatActivity {
         }
 
         adapter.notifyDataSetChanged();
+    }
+
+    public void addParcoursFromApi(Parcours parcours) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("name", parcours.getNom());
+            jsonObject.put("description", parcours.getDescription());
+            jsonObject.put("date", new Date().getTime());
+            jsonObject.put("userId", userId);
+            jsonObject.put("elevation", new JSONArray());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL_ADD_PARCOURS, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        /*try {
+                            // On récupère l'objet Parcours de la réponse
+                            JSONObject parcoursObject = response.getJSONObject("parcours");
+
+                            String parcoursName = parcoursObject.getString("name");
+                            String parcoursDescription = parcoursObject.getString("description");
+                            String parcoursDate = parcoursObject.getString("date");
+                            Parcours parcours = new Parcours(parcoursName, parcoursDate, parcoursDescription);
+                            adapter.add(parcours);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }*/
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+        // Ajout de la requête à la file d'attente
+        requestQueue.add(request);
     }
 
     /**
