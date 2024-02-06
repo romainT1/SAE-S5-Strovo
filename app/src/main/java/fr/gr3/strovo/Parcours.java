@@ -1,13 +1,17 @@
 package fr.gr3.strovo;
 
+import java.util.Date;
+
 public class Parcours {
 
     String nom;
     String date_heure;
+    String description;
 
-    public Parcours(String nom, String date_heure) {
+    public Parcours(String nom, String date_heure, String decription) {
         this.nom = nom;
         this.date_heure = date_heure;
+        this.description = decription;
     }
 
     public String getNom() {
@@ -16,6 +20,14 @@ public class Parcours {
 
     public String getDateHeure() {
         return date_heure;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setNom(String nom) {
