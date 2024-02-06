@@ -9,8 +9,8 @@
     <!-- Popup filtre -->
     <string name="titreFiltres">Filtres</string>
     <string name="inputMois">Mois</string>
-    <string name="inputDureeMin">Durée minimale</string>
-    <string name="inputDureeMax">Durée maximale</string>
+    <string name="dateDebut">01/01/2024</string>
+    <string name="dateFin">01/02/2024</string>
     <string name="rechercher">Rechercher</string>
 
     <!-- Popup lancer course -->

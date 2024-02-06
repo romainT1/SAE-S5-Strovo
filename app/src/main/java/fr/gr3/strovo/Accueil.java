@@ -2,12 +2,16 @@ package fr.gr3.strovo;
 
 import androidx.appcompat.widget.SearchView;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.app.Dialog;
@@ -26,7 +30,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -51,6 +58,9 @@ public class Accueil extends AppCompatActivity {
 
     /** Composant graphique du bouton qui lance un enregistrement de parcours */
     private Button lancerParcoursButton;
+
+    /** Composant graphique du choix de la date dans le filtre */
+    DatePickerDialog picker;
 
 
     /** Liste des parcours de l'utilisateur */
@@ -121,9 +131,24 @@ public class Accueil extends AppCompatActivity {
                 dialog.setContentView(R.layout.popup_filtre);
 
                 // Récupère les éléments de la fenêtre contextuelle
-                EditText inputMois = dialog.findViewById(R.id.inputMois);
-                EditText inputDureeMin = dialog.findViewById(R.id.inputDureeMin);
-                EditText inputDureeMax = dialog.findViewById(R.id.inputDureeMax);
+                EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
+                EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
+
+                inputDateMin.setInputType(InputType.TYPE_NULL);
+                inputDateMin.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showCalendar(inputDateMin);
+                    }
+                });
+
+                inputDateMax.setInputType(InputType.TYPE_NULL);
+                inputDateMax.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showCalendar(inputDateMax);
+                    }
+                });
 
                 Button rechercher = dialog.findViewById(R.id.btnRechercher);
                 Button annuler = dialog.findViewById(R.id.btnAnnuler);
@@ -132,7 +157,19 @@ public class Accueil extends AppCompatActivity {
                 rechercher.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO faire le lien a l'api
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                        try {
+                            Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
+                            Date dateMax = simpleDateFormat.parse(inputDateMax.getText().toString());
+                            Date[] dateFilter = {dateMin, dateMax};
+
+                            parcoursList.clear();
+                            adapter.notifyDataSetChanged();
+                            fetchParcoursFromApi(userId, nameParcours, dateFilter);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
+
                         dialog.dismiss();
                     }
                 });
@@ -205,6 +242,7 @@ public class Accueil extends AppCompatActivity {
      * @param dateIntervalle Intervalle de date dont on veut les parcours
      */
     private void fetchParcoursFromApi(int userId, String nameParcours, Date[] dateIntervalle) {
+        parcoursList.clear();
         String urlModifie = URL_LISTE_PARCOURS;
         String apiUrl = String.format(urlModifie, userId);
 
@@ -214,8 +252,8 @@ public class Accueil extends AppCompatActivity {
         }
 
         if (dateIntervalle != null) {
-            apiUrl += "?dateDebut=%s?dateFin=%s";
-            apiUrl = String.format(apiUrl, dateIntervalle[0], dateIntervalle[1]);
+            apiUrl += "?dateDebut=%s&dateFin=%s";
+            apiUrl = String.format(apiUrl, dateIntervalle[0].getTime(), dateIntervalle[1].getTime());
         }
 
         // Utilisation de la bibliothèque Volley pour effectuer la requête HTTP
@@ -247,6 +285,7 @@ public class Accueil extends AppCompatActivity {
      */
     private void parseJsonResponse(JSONArray response) {
         parcoursList.clear();
+
         for (int i = 0; i < response.length(); i++) {
             try {
                 JSONObject parcoursJson = response.getJSONObject(i);
@@ -258,6 +297,28 @@ public class Accueil extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Affiche un calendrier lors du clic sur un editText.
+     * @param editText edit text sur lequel on veut afficher le calendrier.
+     */
+    private void showCalendar(EditText editText) {
+        final Calendar cldr = Calendar.getInstance();
+        int day = cldr.get(Calendar.DAY_OF_MONTH);
+        int month = cldr.get(Calendar.MONTH);
+        int year = cldr.get(Calendar.YEAR);
+        // date picker dialog
+        picker = new DatePickerDialog(Accueil.this,
+                new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        editText.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
+                    }
+                }, year, month, day);
+        picker.show();
     }
 }
 
