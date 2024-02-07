@@ -9,7 +9,6 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -24,13 +23,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,8 +47,8 @@ public class Accueil extends AppCompatActivity {
     /** URL de l'API pour récupérer la liste des parcours de l'utilisateur */
     private final String URL_LISTE_PARCOURS = "http://172.20.10.14:8080/parcours/utilisateur/%d";
 
-    /** URL de l'API pour ajouter un parcours */
-    private final String URL_ADD_PARCOURS = "http://172.20.10.14:8080/parcours";
+    /** URL de l'API pour ajouter ou supprimer un parcours */
+    private final String URL_PARCOURS = "http://172.20.10.14:8080/parcours";
 
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
@@ -84,22 +83,32 @@ public class Accueil extends AppCompatActivity {
 
     /** Queue pour effectuer la requête HTTP */
     RequestQueue requestQueue;
+
+    /**
+     * Méthode appelée lors de la création de l'activité.
+     * Initialise les composants graphiques, configure les écouteurs d'événements
+     * et effectue les premières actions nécessaires à l'initialisation de l'activité.
+     * @param savedInstanceState L'état de l'activité si elle est recréée après une rotation, par exemple.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
+        // Initialise la file d'attente des requêtes HTTP avec Volley
         requestQueue = Volley.newRequestQueue(this);
 
-        // Affectation des composants graphiques
+        // Affectation des composants graphiques aux variables
         rechercheNom = findViewById(R.id.search_view);
         filterButton = findViewById(R.id.filter_button);
         listViewParcours = findViewById(R.id.list_view);
         lancerParcoursButton = findViewById(R.id.floating_action_button);
 
+        // Initialisation de la liste des parcours avec un élément fictif
         parcoursList = new ArrayList<>();
+        parcoursList.add(new Parcours("Parcours 1", new Date().toString(),"Parcours 1", "1"));
 
-        // Creation d'un adaptateur personnalisé
+        // Création d'un adaptateur personnalisé pour la liste des parcours
         adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
         listViewParcours.setAdapter(adapter);
 
@@ -132,7 +141,9 @@ public class Accueil extends AppCompatActivity {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Crée une instance de Dialog
+               /*Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
+                * pour définir les filtres
+                */
                 final Dialog dialog = new Dialog(Accueil.this);
 
                 // Définis le contenu de la fenêtre contextuelle
@@ -142,6 +153,7 @@ public class Accueil extends AppCompatActivity {
                 EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
                 EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
 
+                // Gestion du clic sur les champs de date pour afficher le calendrier
                 inputDateMin.setInputType(InputType.TYPE_NULL);
                 inputDateMin.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -165,6 +177,10 @@ public class Accueil extends AppCompatActivity {
                 rechercher.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        /*Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
+                         sélectionnées et lance la recherche
+                         */
+
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
                         try {
                             Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
@@ -197,12 +213,50 @@ public class Accueil extends AppCompatActivity {
         });
 
         // Configuration de l'écouteur du clic sur un élément de la liste
-        listViewParcours.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listViewParcours.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Gère le clic sur un élément de la liste
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                /* Lorsque l'utilisateur maintient un élément de la liste enfoncé, ouvre une boîte
+                 * de dialogue pour supprimer le parcours
+                 */
+                final Dialog dialog = new Dialog(Accueil.this);
+                Parcours parcours = parcoursList.get(position);
+                // Définis le contenu de la fenêtre contextuelle
+                dialog.setContentView(R.layout.popup_modif_parcours);
+
+                // Récupère les éléments de la fenêtre contextuelle
+                Button supprimer = dialog.findViewById(R.id.btnSupprimer);
+                Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+                // Gestion du clic sur le bouton "Supprimer"
+                supprimer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        /* Lorsque l'utilisateur clique sur "Supprimer",
+                         * supprime le parcours de l'API et de la liste
+                         */
+                        deleteParcoursFromApi(parcours);
+
+
+                        dialog.dismiss();
+                    }
+                });
+
+                // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
+                annuler.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                // Affiche la fenêtre contextuelle
+                dialog.show();
+
+                return true;
             }
         });
+
 
         // Configuration de l'écouteur du clic sur le bouton d'action flottant
         lancerParcoursButton.setOnClickListener(new View.OnClickListener() {
@@ -255,7 +309,7 @@ public class Accueil extends AppCompatActivity {
      * @param dateIntervalle Intervalle de date dont on veut les parcours
      */
     private void fetchParcoursFromApi(int userId, String nameParcours, Date[] dateIntervalle) {
-        parcoursList.clear();
+        //parcoursList.clear();
         String urlModifie = URL_LISTE_PARCOURS;
         String apiUrl = String.format(urlModifie, userId);
 
@@ -295,14 +349,16 @@ public class Accueil extends AppCompatActivity {
      * @param response Un objet de type JSONArray
      */
     private void parseJsonResponse(JSONArray response) {
-        parcoursList.clear();
+        //parcoursList.clear();
 
         for (int i = 0; i < response.length(); i++) {
             try {
                 JSONObject parcoursJson = response.getJSONObject(i);
                 Parcours parcours = new Parcours(parcoursJson.getString("name"),
                                                  parcoursJson.getString("date"),
-                                                 parcoursJson.getString("description"));
+                                                 parcoursJson.getString("description"),
+                                                 parcoursJson.getString("_id"
+                                                 ));
                 //parcoursList.add(parcours);
                 adapter.add(parcours);
             } catch (JSONException e) {
@@ -313,20 +369,25 @@ public class Accueil extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * Envoie une requête POST à l'API pour ajouter un nouveau parcours.
+     * @param parcours Le parcours à ajouter.
+     */
     public void addParcoursFromApi(Parcours parcours) {
+        // Crée un objet JSON contenant les détails du parcours
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("name", parcours.getNom());
             jsonObject.put("description", parcours.getDescription());
-            jsonObject.put("date", new Date().getTime());
-            jsonObject.put("userId", userId);
-            jsonObject.put("elevation", new JSONArray());
-
+            jsonObject.put("date", new Date().getTime()); // Date actuelle
+            jsonObject.put("userId", userId); // Identifiant de l'utilisateur
+            jsonObject.put("elevation", new JSONArray()); // Tableau JSON vide pour l'élévation
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL_ADD_PARCOURS, jsonObject,
+        // Crée une requête JSON pour envoyer les détails du parcours à l'API
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL_PARCOURS, jsonObject,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -347,12 +408,46 @@ public class Accueil extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                // En cas d'erreur de l'API, cette méthode est appelée
             }
         });
 
-        // Ajout de la requête à la file d'attente
+        // Ajoute la requête à la file d'attente des requêtes HTTP
         requestQueue.add(request);
+    }
+
+    /**
+     * Envoie une requête DELETE à l'API pour supprimer un parcours.
+     * @param parcours Le parcours à supprimer.
+     */
+    public void deleteParcoursFromApi(Parcours parcours) {
+
+        // Construit l'URL spécifique pour le parcours à supprimer
+        String urlModifie = URL_PARCOURS + "/%s";
+        String apiUrl = String.format(urlModifie, parcours.getId());
+
+        // Crée une requête DELETE pour supprimer le parcours de l'API
+        StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, URL_PARCOURS,
+                new Response.Listener<String>()
+                {
+                    @Override
+                    public void onResponse(String response) {
+                        // Traitement de la réponse en cas de succès
+                        Log.d("DELETE Response", response);
+                        adapter.remove(parcours);
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Traitement de l'erreur
+                        Log.e("DELETE Error", error.toString());
+                    }
+                }
+        );
+        // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
+        requestQueue.add(deleteRequest);
     }
 
     /**
