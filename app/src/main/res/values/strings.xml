@@ -32,6 +32,7 @@
     <!-- Popup modif parcours-->
     <string name="modifParcours">Modifier le parcours</string>
 
-
-
+    <!-- Messages -->
+    <string name="errConnexion">Identifiants incorrects</string>
+    <string name="err">Une erreur s\'est produite</string>
 </resources>
