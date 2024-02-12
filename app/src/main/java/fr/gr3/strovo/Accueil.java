@@ -5,6 +5,7 @@ import androidx.appcompat.widget.SearchView;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -84,6 +85,12 @@ public class Accueil extends AppCompatActivity {
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;
 
+    /** Handler pour gérer le délai d'appel à l'API */
+    private Handler handler = new Handler();
+
+    /** Pour gérer le délai de l'appel à l'API */
+    private Runnable runnable;
+
     /**
      * Méthode appelée lors de la création de l'activité.
      * Initialise les composants graphiques, configure les écouteurs d'événements
@@ -95,213 +102,11 @@ public class Accueil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
-        initializeViews();
-        setupEventListeners();
-
-        // Initialise la file d'attente des requêtes HTTP avec Volley
-        /*requestQueue = Volley.newRequestQueue(this);*/
-
-/*        // Affectation des composants graphiques aux variables
-        rechercheNom = findViewById(R.id.search_view);
-        filterButton = findViewById(R.id.filter_button);
-        listViewParcours = findViewById(R.id.list_view);
-        lancerParcoursButton = findViewById(R.id.floating_action_button);*/
-
-        // Initialisation de la liste des parcours
-        /*parcoursList = new ArrayList<>();*/
-
-        // Création d'un adaptateur personnalisé pour la liste des parcours
-        /*adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
-        listViewParcours.setAdapter(adapter);*/
-
-        // Récupération des informations de recherche de parcours
-        //TODO : récupérer l'id de l'utilisateur et autres avec les préférences
+        // TODO : Récupérer l'id du User dans les préférences
         userId = 1;
 
-        // Appelle la méthode pour récupérer les données de l'API
-        // TODO : gérer les erreurs
-/*
-        fetchParcoursFromApi(userId, null, null);
-*/
-
-        // Configuration de l'écouteur de la barre de recherche
-        rechercheNom.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String rechercheNomParcours) {
-                rechercheNomParcours = rechercheNomParcours.replace(" ", "+");
-                fetchParcoursFromApi(userId, rechercheNomParcours, dateIntervalle);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                // Gérer le changement de texte de recherche ici
-                return false;
-            }
-        });
-
-        // Configuration de l'écouteur du bouton de filtre
-        filterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               /* Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
-                * pour définir les filtres
-                */
-                final Dialog dialog = new Dialog(Accueil.this);
-
-                // Définis le contenu de la fenêtre contextuelle
-                dialog.setContentView(R.layout.popup_filtre);
-
-                // Récupère les éléments de la fenêtre contextuelle
-                EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
-                EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
-
-                // Gestion du clic sur les champs de date pour afficher le calendrier
-                inputDateMin.setInputType(InputType.TYPE_NULL);
-                inputDateMin.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showCalendar(inputDateMin);
-                    }
-                });
-
-                inputDateMax.setInputType(InputType.TYPE_NULL);
-                inputDateMax.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showCalendar(inputDateMax);
-                    }
-                });
-
-                Button rechercher = dialog.findViewById(R.id.btnRechercher);
-                Button annuler = dialog.findViewById(R.id.btnAnnuler);
-
-                // Gère le clic sur le bouton "rechercher"
-                rechercher.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        /* Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
-                         * sélectionnées et lance la recherche
-                         */
-
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                        try {
-                            Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
-                            Date dateMax = simpleDateFormat.parse(inputDateMax.getText().toString());
-                            Date[] dateFilter = {dateMin, dateMax};
-
-                            parcoursList.clear();
-                            adapter.notifyDataSetChanged();
-                            fetchParcoursFromApi(userId, nameParcours, dateFilter);
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        dialog.dismiss();
-                    }
-                });
-
-                // Gère le clic sur le bouton "Annuler"
-                annuler.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                // Affiche la fenêtre contextuelle
-                dialog.show();
-            }
-
-        });
-
-        // Configuration de l'écouteur du clic sur un élément de la liste
-        listViewParcours.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                /* Lorsque l'utilisateur maintient un élément de la liste enfoncé, ouvre une boîte
-                 * de dialogue pour supprimer le parcours
-                 */
-                final Dialog dialog = new Dialog(Accueil.this);
-                Parcours parcours = parcoursList.get(position);
-                // Définis le contenu de la fenêtre contextuelle
-                dialog.setContentView(R.layout.popup_modif_parcours);
-
-                // Récupère les éléments de la fenêtre contextuelle
-                Button supprimer = dialog.findViewById(R.id.btnSupprimer);
-                Button annuler = dialog.findViewById(R.id.btnAnnuler);
-
-                // Gestion du clic sur le bouton "Supprimer"
-                supprimer.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        /* Lorsque l'utilisateur clique sur "Supprimer",
-                         * supprime le parcours de l'API et de la liste
-                         */
-                        deleteParcoursFromApi(parcours);
-
-                        dialog.dismiss();
-                    }
-                });
-
-                // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
-                annuler.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                // Affiche la fenêtre contextuelle
-                dialog.show();
-
-                return true;
-            }
-        });
-
-
-        // Configuration de l'écouteur du clic sur le bouton d'action flottant
-        lancerParcoursButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Créé une instance de Dialog
-                final Dialog dialog = new Dialog(Accueil.this);
-
-                // Définis le contenu de la fenêtre contextuelle
-                dialog.setContentView(R.layout.popup_lancer_course);
-
-                // Récupére les éléments de la fenêtre contextuelle
-                EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
-                EditText inputName = dialog.findViewById(R.id.inputNom);
-
-                Button confirmer = dialog.findViewById(R.id.confirmer);
-                Button annuler = dialog.findViewById(R.id.annuler);
-
-                // Gère le clic sur le bouton "Confirmer"
-                confirmer.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
-                        addParcoursFromApi(parcours);
-
-                        Intent intent = new Intent(Accueil.this, MapActivity.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                    }
-                });
-
-                // Gère le clic sur le bouton "Annuler"
-                annuler.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                // Affiche la fenêtre contextuelle
-                dialog.show();
-            }
-        });
+        initializeViews();
+        setupEventListeners();
     }
 
     /**
@@ -351,7 +156,7 @@ public class Accueil extends AppCompatActivity {
      * @param response Un objet de type JSONArray
      */
     private void parseJsonResponse(JSONArray response) {
-        //parcoursList.clear();
+        parcoursList.clear();
 
         for (int i = 0; i < response.length(); i++) {
             try {
@@ -429,7 +234,7 @@ public class Accueil extends AppCompatActivity {
         String apiUrl = String.format(urlModifie, parcours.getId());
 
         // Crée une requête DELETE pour supprimer le parcours de l'API
-        StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, URL_PARCOURS,
+        StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, apiUrl,
                 new Response.Listener<String>()
                 {
                     @Override
@@ -472,6 +277,9 @@ public class Accueil extends AppCompatActivity {
         picker.show();
     }
 
+    /**
+     * Initialise les vues de l'activité et configure les écouteurs d'événements.
+     */
     private void initializeViews() {
         // Initialisation des composants graphiques
         rechercheNom = findViewById(R.id.search_view);
@@ -479,23 +287,32 @@ public class Accueil extends AppCompatActivity {
         listViewParcours = findViewById(R.id.list_view);
         lancerParcoursButton = findViewById(R.id.floating_action_button);
 
+        // Initialisation de la liste des parcours
+        parcoursList = new ArrayList<>();
+
         // Création d'un adaptateur personnalisé pour la liste des parcours
         adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
         listViewParcours.setAdapter(adapter);
-
-        // Initialisation de la liste des parcours
-        parcoursList = new ArrayList<>();
 
         // Initialise la file d'attente des requêtes HTTP avec Volley
         requestQueue = Volley.newRequestQueue(this);
     }
 
+    /**
+     * Configure les écouteurs d'événements.
+     */
     private void setupEventListeners() {
-        // Configuration des écouteurs d'événements
         // Configuration de l'écouteur de la barre de recherche
+        searchBarListener();
+
         // Configuration de l'écouteur du bouton de filtre
+        filterListener();
+
         // Configuration de l'écouteur du clic sur un élément de la liste
-        // Configuration de l'écouteur du clic sur le bouton d'action flottant
+        itemListListener();
+
+        // Configuration de l'écouteur du clic sur le bouton d'enregistrement de parcours
+        saveParcoursListener();
     }
 
     @Override
@@ -508,9 +325,217 @@ public class Accueil extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        // Libérer les ressources
-        // Canceler les requêtes Volley en cours si nécessaire
         super.onDestroy();
+        if (requestQueue != null) {
+            // Annuler toutes les requêtes en cours associées à cette activité
+            requestQueue.cancelAll(this);
+        }
+    }
+
+    /**
+     * Configure l'écouteur de la barre de recherche.
+     */
+    private void searchBarListener() {
+        rechercheNom.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String rechercheNomParcours) {
+                // Ne rien faire lors de la soumission du texte
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Supprimer les appels en attente
+                handler.removeCallbacks(runnable);
+
+                // Définir un délai avant l'appel à l'API
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        String rechercheNomParcours = newText.replace(" ", "+");
+                        fetchParcoursFromApi(userId, rechercheNomParcours, dateIntervalle);
+                    }
+                };
+
+                // Attendre 300 millisecondes avant d'appeler l'API (modifiable selon vos besoins)
+                handler.postDelayed(runnable, 300);
+
+                return true;
+            }
+        });
+    }
+
+    /**
+     * Configure l'écouteur du bouton de filtre.
+     */
+    private void filterListener() {
+        filterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /* Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
+                 * pour définir les filtres
+                 */
+                final Dialog dialog = new Dialog(Accueil.this);
+
+                // Définis le contenu de la fenêtre contextuelle
+                dialog.setContentView(R.layout.popup_filtre);
+
+                // Récupère les éléments de la fenêtre contextuelle
+                EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
+                EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
+
+                // Gestion du clic sur les champs de date pour afficher le calendrier
+                inputDateMin.setInputType(InputType.TYPE_NULL);
+                inputDateMin.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showCalendar(inputDateMin);
+                    }
+                });
+
+                inputDateMax.setInputType(InputType.TYPE_NULL);
+                inputDateMax.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showCalendar(inputDateMax);
+                    }
+                });
+
+                Button rechercher = dialog.findViewById(R.id.btnRechercher);
+                Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+                // Gère le clic sur le bouton "rechercher"
+                rechercher.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        /* Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
+                         * sélectionnées et lance la recherche
+                         */
+
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                        try {
+                            Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
+                            Date dateMax = simpleDateFormat.parse(inputDateMax.getText().toString());
+                            Date[] dateFilter = {dateMin, dateMax};
+
+                            parcoursList.clear();
+                            adapter.notifyDataSetChanged();
+                            fetchParcoursFromApi(userId, nameParcours, dateFilter);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        dialog.dismiss();
+                    }
+                });
+
+                // Gère le clic sur le bouton "Annuler"
+                annuler.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                // Affiche la fenêtre contextuelle
+                dialog.show();
+            }
+        });
+    }
+
+    /**
+     * Configure l'écouteur du clic sur un élément de la liste.
+     */
+    private void itemListListener() {
+        listViewParcours.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                /* Lorsque l'utilisateur maintient un élément de la liste enfoncé, ouvre une boîte
+                 * de dialogue pour supprimer le parcours
+                 */
+                final Dialog dialog = new Dialog(Accueil.this);
+                Parcours parcours = parcoursList.get(position);
+                // Définis le contenu de la fenêtre contextuelle
+                dialog.setContentView(R.layout.popup_modif_parcours);
+
+                // Récupère les éléments de la fenêtre contextuelle
+                Button supprimer = dialog.findViewById(R.id.btnSupprimer);
+                Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+                // Gestion du clic sur le bouton "Supprimer"
+                supprimer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        /* Lorsque l'utilisateur clique sur "Supprimer",
+                         * supprime le parcours de l'API et de la liste
+                         */
+                        deleteParcoursFromApi(parcours);
+
+                        dialog.dismiss();
+                    }
+                });
+
+                // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
+                annuler.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                // Affiche la fenêtre contextuelle
+                dialog.show();
+
+                return true;
+            }
+        });
+    }
+
+    /**
+     * Configure l'écouteur du clic sur le bouton d'enregistrement de parcours.
+     */
+    private void saveParcoursListener() {
+        lancerParcoursButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Créé une instance de Dialog
+                final Dialog dialog = new Dialog(Accueil.this);
+
+                // Définis le contenu de la fenêtre contextuelle
+                dialog.setContentView(R.layout.popup_lancer_course);
+
+                // Récupére les éléments de la fenêtre contextuelle
+                EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
+                EditText inputName = dialog.findViewById(R.id.inputNom);
+
+                Button confirmer = dialog.findViewById(R.id.confirmer);
+                Button annuler = dialog.findViewById(R.id.annuler);
+
+                // Gère le clic sur le bouton "Confirmer"
+                confirmer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
+                        addParcoursFromApi(parcours);
+
+                        Intent intent = new Intent(Accueil.this, MapActivity.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+                });
+
+                // Gère le clic sur le bouton "Annuler"
+                annuler.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                // Affiche la fenêtre contextuelle
+                dialog.show();
+            }
+        });
     }
 }
 
