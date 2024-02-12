@@ -63,7 +63,7 @@ public class Accueil extends AppCompatActivity {
     private Button lancerParcoursButton;
 
     /** Composant graphique du choix de la date dans le filtre */
-    DatePickerDialog picker;
+    private DatePickerDialog picker;
 
 
     /** Liste des parcours de l'utilisateur */
@@ -82,7 +82,7 @@ public class Accueil extends AppCompatActivity {
     private Date[] dateIntervalle;
 
     /** Queue pour effectuer la requête HTTP */
-    RequestQueue requestQueue;
+    private RequestQueue requestQueue;
 
     /**
      * Méthode appelée lors de la création de l'activité.
@@ -95,31 +95,34 @@ public class Accueil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
-        // Initialise la file d'attente des requêtes HTTP avec Volley
-        requestQueue = Volley.newRequestQueue(this);
+        initializeViews();
+        setupEventListeners();
 
-        // Affectation des composants graphiques aux variables
+        // Initialise la file d'attente des requêtes HTTP avec Volley
+        /*requestQueue = Volley.newRequestQueue(this);*/
+
+/*        // Affectation des composants graphiques aux variables
         rechercheNom = findViewById(R.id.search_view);
         filterButton = findViewById(R.id.filter_button);
         listViewParcours = findViewById(R.id.list_view);
-        lancerParcoursButton = findViewById(R.id.floating_action_button);
+        lancerParcoursButton = findViewById(R.id.floating_action_button);*/
 
-        // Initialisation de la liste des parcours avec un élément fictif
-        parcoursList = new ArrayList<>();
-        parcoursList.add(new Parcours("Parcours 1", new Date().toString(),"Parcours 1", "1"));
+        // Initialisation de la liste des parcours
+        /*parcoursList = new ArrayList<>();*/
 
         // Création d'un adaptateur personnalisé pour la liste des parcours
-        adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
-        listViewParcours.setAdapter(adapter);
+        /*adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
+        listViewParcours.setAdapter(adapter);*/
 
         // Récupération des informations de recherche de parcours
         //TODO : récupérer l'id de l'utilisateur et autres avec les préférences
         userId = 1;
-        nameParcours = null;
-        dateIntervalle = null;
 
         // Appelle la méthode pour récupérer les données de l'API
-        fetchParcoursFromApi(userId, nameParcours, dateIntervalle);
+        // TODO : gérer les erreurs
+/*
+        fetchParcoursFromApi(userId, null, null);
+*/
 
         // Configuration de l'écouteur de la barre de recherche
         rechercheNom.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -132,7 +135,7 @@ public class Accueil extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Gérez le changement de texte de recherche ici
+                // Gérer le changement de texte de recherche ici
                 return false;
             }
         });
@@ -141,7 +144,7 @@ public class Accueil extends AppCompatActivity {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               /*Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
+               /* Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
                 * pour définir les filtres
                 */
                 final Dialog dialog = new Dialog(Accueil.this);
@@ -177,8 +180,8 @@ public class Accueil extends AppCompatActivity {
                 rechercher.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        /*Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
-                         sélectionnées et lance la recherche
+                        /* Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
+                         * sélectionnées et lance la recherche
                          */
 
                         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -236,7 +239,6 @@ public class Accueil extends AppCompatActivity {
                          * supprime le parcours de l'API et de la liste
                          */
                         deleteParcoursFromApi(parcours);
-
 
                         dialog.dismiss();
                     }
@@ -357,7 +359,7 @@ public class Accueil extends AppCompatActivity {
                 Parcours parcours = new Parcours(parcoursJson.getString("name"),
                                                  parcoursJson.getString("date"),
                                                  parcoursJson.getString("description"),
-                                                 parcoursJson.getString("_id"
+                                                 parcoursJson.getString("id"
                                                  ));
                 //parcoursList.add(parcours);
                 adapter.add(parcours);
@@ -468,6 +470,47 @@ public class Accueil extends AppCompatActivity {
                     }
                 }, year, month, day);
         picker.show();
+    }
+
+    private void initializeViews() {
+        // Initialisation des composants graphiques
+        rechercheNom = findViewById(R.id.search_view);
+        filterButton = findViewById(R.id.filter_button);
+        listViewParcours = findViewById(R.id.list_view);
+        lancerParcoursButton = findViewById(R.id.floating_action_button);
+
+        // Création d'un adaptateur personnalisé pour la liste des parcours
+        adapter = new ParcoursAdapter(this, R.layout.vue_item_liste, parcoursList);
+        listViewParcours.setAdapter(adapter);
+
+        // Initialisation de la liste des parcours
+        parcoursList = new ArrayList<>();
+
+        // Initialise la file d'attente des requêtes HTTP avec Volley
+        requestQueue = Volley.newRequestQueue(this);
+    }
+
+    private void setupEventListeners() {
+        // Configuration des écouteurs d'événements
+        // Configuration de l'écouteur de la barre de recherche
+        // Configuration de l'écouteur du bouton de filtre
+        // Configuration de l'écouteur du clic sur un élément de la liste
+        // Configuration de l'écouteur du clic sur le bouton d'action flottant
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Appelle la méthode pour récupérer les données de l'API
+        fetchParcoursFromApi(userId, null, null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Libérer les ressources
+        // Canceler les requêtes Volley en cours si nécessaire
+        super.onDestroy();
     }
 }
 
