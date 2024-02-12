@@ -36,7 +36,7 @@
         android:textSize="20sp"
         android:layout_marginTop="20dp"
         android:height="60dp"
-        android:onClick="clicBoutonConnexion"/>
+        android:onClick="clicConnexion"/>
 
     <Button
         android:layout_width="match_parent"
@@ -44,7 +44,7 @@
         android:layout_marginTop="16dp"
         android:height="60dp"
         android:backgroundTint="#00C60F02"
-        android:onClick="clicBoutonInscription"
+        android:onClick="clicInscription"
         android:text="S'inscrire"
         android:textColor="#F44336"
         android:textSize="20sp"
