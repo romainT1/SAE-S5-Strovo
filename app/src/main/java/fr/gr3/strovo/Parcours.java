@@ -1,6 +1,9 @@
 package fr.gr3.strovo;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class Parcours {
 
@@ -30,7 +33,23 @@ public class Parcours {
     }
 
     public String getDateHeure() {
-        return date_heure;
+        // Créer un objet SimpleDateFormat pour le format d'entrée
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
+        // Créer un objet SimpleDateFormat pour le format de sortie
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        try {
+            // Convertir la chaîne en objet Date
+            Date date = inputFormat.parse(date_heure);
+
+            // Formater la date
+            String formattedDate = outputFormat.format(date);
+
+            return formattedDate;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getDescription() {
