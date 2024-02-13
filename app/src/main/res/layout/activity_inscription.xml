@@ -16,26 +16,35 @@
         android:id="@+id/prenom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Prénom"
         android:background="@android:drawable/editbox_background"
         android:height="50dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:hint="Prénom"
+        android:inputType="text"
+        android:maxLength="15"
+        android:maxLines="0"/>
     <EditText
         android:id="@+id/nom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nom"
         android:background="@android:drawable/editbox_background"
         android:height="50dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:hint="Nom"
+        android:inputType="text"
+        android:maxLength="15"
+        android:maxLines="1"/>
     <EditText
         android:id="@+id/email_inscription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Email"
         android:background="@android:drawable/editbox_background"
         android:height="50dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_marginBottom="10dp"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:maxLength="32"
+        android:maxLines="1"/>
 
     <EditText
         android:id="@+id/mot_de_passe_inscription"
@@ -44,7 +53,10 @@
         android:layout_marginBottom="10dp"
         android:height="50dp"
         android:background="@android:drawable/editbox_background"
-        android:hint="Mot de passe"/>
+        android:hint="Mot de passe"
+        android:inputType="textPassword"
+        android:maxLength="64"
+        android:maxLines="1"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +64,7 @@
         android:textSize="20sp"
         android:layout_marginTop="20dp"
         android:height="60dp"
-        android:onClick="clicBoutonInscrire"/>
+        android:onClick="clicInscrire"/>
 
     <Button
         android:layout_width="match_parent"
@@ -60,7 +72,7 @@
         android:layout_marginTop="16dp"
         android:height="60dp"
         android:backgroundTint="#00C60F02"
-        android:onClick="clicBoutonRetour"
+        android:onClick="clicRetour"
         android:text="Retour"
         android:textColor="#F44336"
         android:textSize="20sp"
