@@ -21,7 +21,7 @@ import org.json.JSONException;
 public class MainActivity extends AppCompatActivity {
 
     /** Url pour la connexion */
-    private static final String LOGIN_URL = "http://localhost:8080/user/login?email=%s&password=%s";
+    private static final String LOGIN_URL = "http://10.2.14.28:8080/user/login?email=%s&password=%s";
 
     /** Clé pour le token transmis par l'activité accueil */
     public static final String EXTRA_TOKEN = "token";
@@ -71,12 +71,14 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intention);
     }
 
-    /*
+
+    /**
      * Envoie une requête de connexion à l'API et enregistre le token reçu
      * dans les préférences.
+     * @param email
+     * @param password
      */
     private void connexion(String email, String password) {
-        // Appel à l'API pour vérifier les informations d'authentification
         String apiUrl = String.format(LOGIN_URL, email, password);
 
         // Crée une requête GET pour s'identifier à l'API
