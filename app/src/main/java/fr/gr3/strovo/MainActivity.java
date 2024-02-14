@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
      * @param password
      */
     private void connexion(String email, String password) {
-        // Appel à l'API pour vérifier les informations d'authentification
         String apiUrl = String.format(LOGIN_URL, email, password);
 
         // Crée une requête GET pour s'identifier à l'API

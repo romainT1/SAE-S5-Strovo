@@ -1,13 +1,9 @@
 package fr.gr3.strovo.model;
 
+import org.json.JSONObject;
+
 /** Représente un utilisateur. */
 public class User {
-
-    /** Prénom de l'utilisateur */
-    private String firstname;
-
-    /** Nom de l'utilisateur */
-    private String lastname;
 
     /** Adresse mail de l'utilisateur */
     private String email;
@@ -15,18 +11,31 @@ public class User {
     /** Mot de passe de l'utilisateur */
     private String password;
 
+    /** Prénom de l'utilisateur */
+    private String firstname;
+
+    /** Nom de l'utilisateur */
+    private String lastname;
+
     /**
      * Crée un utilisateur.
-     * @param firstname prénom
-     * @param lastname nom
      * @param email adresse mail
      * @param password mot de passe
+     * @param firstname prénom
+     * @param lastname nom
      */
-    public User(String firstname, String lastname, String email, String password) {
-        this.firstname = firstname;
-        this.lastname = lastname;
+    public User(String email, String password, String firstname, String lastname) {
         this.email = email;
         this.password = password;
+        this.firstname = firstname;
+        this.lastname = lastname;
+    }
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getFirstname() {
@@ -37,11 +46,4 @@ public class User {
         return lastname;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 }

@@ -34,11 +34,11 @@
 
     <!-- Messages -->
     <string name="errConnexion">Identifiants incorrects</string>
-    <string name="errInscriptionEmailFormat">Adresse mail invalide</string>
-    <string name="errInscriptionPasswordFormat"></string>
     <string name="errInscriptionFirstname">Le prénom doit faire entre %d et %d caractères</string>
     <string name="errInscriptionLastname">Le nom doit faire entre %d et %d caractères</string>
     <string name="errInscriptionEmail">L\'adresse mail doit être valide et ne pas dépasser %d caractères</string>
     <string name="errInscriptionPassword">Le mot de passe doit faire entre %d et %d caractères</string>
+    <string name="errInscriptionConflict">Cet adresse mail est déjà utilisée</string>
+
     <string name="err">Une erreur s\'est produite</string>
 </resources>
