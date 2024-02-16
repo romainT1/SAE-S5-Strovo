@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 import fr.gr3.strovo.model.User;
@@ -32,7 +33,7 @@ import fr.gr3.strovo.model.User;
 public class Inscription extends AppCompatActivity {
 
     /** Url pour l'inscription */
-    private static final String SIGNUP_URL = "http://10.2.14.28:8080/user/signup";
+    private static final String SIGNUP_URL = "http://10.2.14.27:8080/user/signup";
 
     /** Champ de saisie du prénom */
     private EditText firstname;
@@ -70,7 +71,7 @@ public class Inscription extends AppCompatActivity {
      * Exécuté quand l'utilisateur clique sur le bouton d'inscription.
      * @param view vue
      */
-    public void clicInscrire(View view) {
+    public void clicInscrire(View view) throws NoSuchAlgorithmException {
         // Récupération des informations de l'utilisateur
         User user = new User(email.getText().toString(), password.getText().toString(),
                 firstname.getText().toString(), lastname.getText().toString());
@@ -119,12 +120,12 @@ public class Inscription extends AppCompatActivity {
      * une fois l'utilisateur enregistré.
      * @param user utilisateur à enregistrer
      */
-    private void inscription(User user) {
+    private void inscription(User user) throws NoSuchAlgorithmException {
         // Crée un objet JSON contenant les détails du parcours
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("email", user.getEmail());
-            jsonObject.put("password", user.getPassword());
+            jsonObject.put("password", PasswordHasher.hashPassword(user.getPassword()));
             jsonObject.put("firstname", user.getFirstname());
             jsonObject.put("lastname", user.getLastname());
         } catch (JSONException e) {
@@ -147,6 +148,7 @@ public class Inscription extends AppCompatActivity {
                     }
                 }
                 Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
+                Log.d("Erreur inscription", error.getMessage());
             }
         );
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
