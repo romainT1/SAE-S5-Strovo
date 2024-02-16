@@ -2,6 +2,7 @@ package fr.gr3.strovo;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -15,13 +16,15 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 
+import java.security.NoSuchAlgorithmException;
+
 /**
  * Activité principale, page de connexion.
  */
 public class MainActivity extends AppCompatActivity {
 
     /** Url pour la connexion */
-    private static final String LOGIN_URL = "http://10.2.14.28:8080/user/login?email=%s&password=%s";
+    private static final String LOGIN_URL = "http://10.2.14.27:8080/user/login?email=%s&password=%s";
 
     /** Clé pour le token transmis par l'activité accueil */
     public static final String EXTRA_TOKEN = "token";
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
      * Exécuté quand l'utilisateur clique sur le bouton de connexion.
      * @param view vue
      */
-    public void clicConnexion(View view) {
+    public void clicConnexion(View view) throws NoSuchAlgorithmException {
         String emailValue = email.getText().toString();
         String passwordValue = motDePasse.getText().toString();
         connexion(emailValue, passwordValue);
@@ -78,8 +81,8 @@ public class MainActivity extends AppCompatActivity {
      * @param email
      * @param password
      */
-    private void connexion(String email, String password) {
-        String apiUrl = String.format(LOGIN_URL, email, password);
+    private void connexion(String email, String password) throws NoSuchAlgorithmException {
+        String apiUrl = String.format(LOGIN_URL, email, PasswordHasher.hashPassword(password));
 
         // Crée une requête GET pour s'identifier à l'API
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -103,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     Toast.makeText(MainActivity.this, messageErreur, Toast.LENGTH_LONG).show();
+                    Log.d("Erreur connexion", error.getMessage());
                 });
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
         requestQueue.add(jsonObjectRequest);

@@ -46,7 +46,7 @@ import java.util.List;
 public class Accueil extends AppCompatActivity {
 
     /** URL de l'API pour récupérer la liste des parcours de l'utilisateur */
-    private final String URL_LISTE_PARCOURS = "http://172.20.10.14:8080/parcours/utilisateur/%d";
+    private final String URL_LISTE_PARCOURS = "http://10.2.14.27:8080/parcours/utilisateur/%d";
 
     /** URL de l'API pour ajouter ou supprimer un parcours */
     private final String URL_PARCOURS = "http://172.20.10.14:8080/parcours";
