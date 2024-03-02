@@ -21,7 +21,9 @@
         android:layout_height="wrap_content"
         android:inputType="text"
         android:hint="@string/inputLibelle"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:maxLength="15"
+        android:maxLines="0"/>
 
     <EditText
         android:id="@+id/inputDescription"
@@ -29,10 +31,12 @@
         android:layout_height="wrap_content"
         android:inputType="text"
         android:hint="@string/inputDescription"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:maxLength="32"
+        android:maxLines="0"/>
 
     <Button
-        android:id="@+id/confirmer"
+        android:id="@+id/btnConfirmer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -41,7 +45,7 @@
         android:textColor="#FFFFFF" />
 
     <Button
-        android:id="@+id/annuler"
+        android:id="@+id/btnAnnuler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

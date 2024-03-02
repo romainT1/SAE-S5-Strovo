@@ -38,6 +38,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import fr.gr3.strovo.map.CourseActivity;
+
 /**
  * Classe représentant l'activité principale de l'application, correspondant à l'écran d'accueil.
  * Cette activité affiche une liste de parcours et permet aux utilisateurs de rechercher, filtrer,
@@ -518,7 +520,7 @@ public class Accueil extends AppCompatActivity {
                         Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
                         addParcoursFromApi(parcours);
 
-                        Intent intent = new Intent(Accueil.this, MapActivity.class);
+                        Intent intent = new Intent(Accueil.this, CourseActivity.class);
                         startActivity(intent);
                         dialog.dismiss();
                     }
