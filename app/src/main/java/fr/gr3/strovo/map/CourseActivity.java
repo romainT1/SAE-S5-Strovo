@@ -1,5 +1,7 @@
 package fr.gr3.strovo.map;
 
+import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -9,6 +11,10 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,15 +35,18 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import fr.gr3.strovo.R;
 
 public class CourseActivity extends AppCompatActivity {
+
     /** Fournisseur de localisation de l'utilisateur. */
     private static final String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
 
     /** Carte à afficher à l'écran. */
     private MapView map;
 
+    /** Bouton d'arrêt d'enregistrement */
+    private Button stopButton;
+
     /** Parcours effectué par l'utilisateur. */
     private Parcours parcours;
-
 
     /** Ecouteur de localisation de l'utilisateur. */
     private LocationListener locationListener;
@@ -59,12 +68,14 @@ public class CourseActivity extends AppCompatActivity {
 
     /**
      * Méthode appelée lors de la création de l'activité.
-     * @param savedInstanceState
+     * Initialise les composants graphiques, configure les écouteurs d'événements
+     * et effectue les premières actions nécessaires à l'initialisation de l'activité.
+     * @param savedInstanceState Etat de l'activité.
      */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_map);
 
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
@@ -73,6 +84,7 @@ public class CourseActivity extends AppCompatActivity {
                 new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
 
         map = initMap();
+        stopButton = initStopButton();
         parcours = new Parcours();
         locationListener = initLocationListener();
         locationManager = initLocationManager();
@@ -93,6 +105,9 @@ public class CourseActivity extends AppCompatActivity {
         parcours.start();
     }
 
+    /**
+     * Méthode exécutée lors d'une demande de permission.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -100,8 +115,7 @@ public class CourseActivity extends AppCompatActivity {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(CourseActivity.this, "Permission Autorisée", Toast.LENGTH_SHORT).show();
             // TODO voir quoi faire ??
-        }
-        else {
+        } else {
             Toast.makeText(CourseActivity.this, "Permission Refusée", Toast.LENGTH_SHORT).show();
             // TODO voir quoi faire ??
         }
@@ -117,6 +131,30 @@ public class CourseActivity extends AppCompatActivity {
         map.setMultiTouchControls(true);
         map.getController().setZoom(20.0);
         return map;
+    }
+
+    /**
+     * Initialise le bouton d'arrêt d'enregistrement du parcours
+     * @return la carte initilisée
+     */
+    private Button initStopButton() {
+        Button button = findViewById(R.id.btnArreter);
+        button.setOnClickListener(v -> {
+            Toast.makeText(getApplicationContext(), "Appuyez longtemps pour arrêter le parcours", Toast.LENGTH_SHORT).show();
+        });
+        button.setOnLongClickListener(v -> {
+            // TODO cliquer 3sec
+            //TODO désactiver tout ce qui est désactivable ??
+/*
+            locationManager.removeUpdates(ecouteurGPS); // TODO utile ?????
+            ecouteurGPS = null;*/
+
+            // TODO Sauvegarder parcours
+            saveParcours();
+            finish(); // Termine l'activité
+            return true;
+        });
+        return button;
     }
 
 
@@ -157,7 +195,7 @@ public class CourseActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onStatusChanged(String fournisseur, int status, Bundle extras){
+            public void onStatusChanged(String fournisseur, int status, Bundle extras) {
                 switch (status) {
                     case LocationProvider.AVAILABLE:
                         Toast.makeText(getApplicationContext(), fournisseur + " état disponible", Toast.LENGTH_SHORT).show();
@@ -239,32 +277,52 @@ public class CourseActivity extends AppCompatActivity {
 
     /**
      * Exécuté quand l'utilisateur appuie sur le bouton "ajouter un point d'intérêt".
-     * Crée un nouveau parcours et lance le chronomètre de ce parcours.
+     * Ouvre une boîte de dialogue dans laquelle seront demandées le nom et la description
+     * du point d'intérêt à ajouter.
      */
-    private void ClickAddInterestPoint() {
+    public void clickAddInterestPoint(View view) {
+        final Dialog dialog = new Dialog(CourseActivity.this);
+
+        // Définis le contenu de la fenêtre contextuelle
+        dialog.setContentView(R.layout.popup_point_interet);
+
+        // Récupère les éléments de la fenêtre contextuelle
+        EditText inputLibelle = dialog.findViewById(R.id.inputLibelle); // Obligatoire
+        EditText inputDescription = dialog.findViewById(R.id.inputDescription); // Optionnelle
+        Button confirmer = dialog.findViewById(R.id.btnConfirmer);
+        Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+        confirmer.setOnClickListener(v -> {
+            // TODO vérifier que l'input libelle est bien défini
+            // Vérification des permissions
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            Location currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            GeoPoint point = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+            InterestPoint interestPoint = new InterestPoint(point,
+                    inputLibelle.getText().toString(), inputDescription.getText().toString());
+            addInterestPoint(interestPoint);
+            dialog.dismiss();
+        });
+
+        annuler.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
         //TODO la popup doit renvoyer à l'activité le nom et description saisie par l'utilisateur
         // TODO appeler la méthode addInterestPoint(interestPoint);
 
-    }
-
-    /**
-     * Exécuté quand l'utilisateur appuie sur le bouton "Arrêter".
-     */
-    private void ClickStop() {
-        //TODO désactiver tout ce qui est désactivable ??
-/*
-            locationManager.removeUpdates(ecouteurGPS); // TODO utile ?????
-            ecouteurGPS = null;*/
-
-        // TODO Sauvegarder parcours
-        SaveParcours();
+        dialog.show();
     }
 
 
     /**
      * Envoie le parcours à l'API, si erreur, enregistre le parcours en local.
      */
-    private void SaveParcours() {
+    private void saveParcours() {
         //TODO Méthode API pour enregistrer le parcours
     }
 }

@@ -18,6 +18,8 @@ import org.json.JSONException;
 
 import java.security.NoSuchAlgorithmException;
 
+import fr.gr3.strovo.map.CourseActivity;
+
 /**
  * Activité principale, page de connexion.
  */

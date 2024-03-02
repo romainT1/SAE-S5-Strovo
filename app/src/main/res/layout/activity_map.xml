@@ -20,6 +20,7 @@
             android:id="@+id/btnAjouter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:onClick="clickAddInterestPoint"
             android:text="@string/ajouterPointInteret" />
 
         <Button
