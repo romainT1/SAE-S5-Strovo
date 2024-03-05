@@ -1,9 +1,13 @@
 package fr.gr3.strovo;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -15,8 +19,10 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.app.Dialog;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -307,14 +313,8 @@ public class Accueil extends AppCompatActivity {
         // Configuration de l'écouteur de la barre de recherche
         searchBarListener();
 
-        // Configuration de l'écouteur du bouton de filtre
-        filterListener();
-
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
-
-        // Configuration de l'écouteur du clic sur le bouton d'enregistrement de parcours
-        saveParcoursListener();
     }
 
     @Override
@@ -368,81 +368,76 @@ public class Accueil extends AppCompatActivity {
     }
 
     /**
-     * Configure l'écouteur du bouton de filtre.
+     * Méthode exécutée lorsque l'utilisateur clique sur le bouton des filtres.
      */
-    private void filterListener() {
-        filterButton.setOnClickListener(new View.OnClickListener() {
+    public void clickFilter(View v) {
+        /* Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
+         * pour définir les filtres
+         */
+        final Dialog dialog = new Dialog(Accueil.this);
+
+        // Définis le contenu de la fenêtre contextuelle
+        dialog.setContentView(R.layout.popup_filtre);
+
+        // Récupère les éléments de la fenêtre contextuelle
+        EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
+        EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
+
+        // Gestion du clic sur les champs de date pour afficher le calendrier
+        inputDateMin.setInputType(InputType.TYPE_NULL);
+        inputDateMin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /* Lorsque l'utilisateur clique sur le bouton de filtre, ouvre une boîte de dialogue
-                 * pour définir les filtres
-                 */
-                final Dialog dialog = new Dialog(Accueil.this);
-
-                // Définis le contenu de la fenêtre contextuelle
-                dialog.setContentView(R.layout.popup_filtre);
-
-                // Récupère les éléments de la fenêtre contextuelle
-                EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
-                EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
-
-                // Gestion du clic sur les champs de date pour afficher le calendrier
-                inputDateMin.setInputType(InputType.TYPE_NULL);
-                inputDateMin.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showCalendar(inputDateMin);
-                    }
-                });
-
-                inputDateMax.setInputType(InputType.TYPE_NULL);
-                inputDateMax.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showCalendar(inputDateMax);
-                    }
-                });
-
-                Button rechercher = dialog.findViewById(R.id.btnRechercher);
-                Button annuler = dialog.findViewById(R.id.btnAnnuler);
-
-                // Gère le clic sur le bouton "rechercher"
-                rechercher.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        /* Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
-                         * sélectionnées et lance la recherche
-                         */
-
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                        try {
-                            Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
-                            Date dateMax = simpleDateFormat.parse(inputDateMax.getText().toString());
-                            Date[] dateFilter = {dateMin, dateMax};
-
-                            parcoursList.clear();
-                            adapter.notifyDataSetChanged();
-                            fetchParcoursFromApi(userId, nameParcours, dateFilter);
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        dialog.dismiss();
-                    }
-                });
-
-                // Gère le clic sur le bouton "Annuler"
-                annuler.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                // Affiche la fenêtre contextuelle
-                dialog.show();
+                showCalendar(inputDateMin);
             }
         });
+
+        inputDateMax.setInputType(InputType.TYPE_NULL);
+        inputDateMax.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCalendar(inputDateMax);
+            }
+        });
+
+        Button rechercher = dialog.findViewById(R.id.btnRechercher);
+        Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+        // Gère le clic sur le bouton "rechercher"
+        rechercher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /* Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
+                 * sélectionnées et lance la recherche
+                 */
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                try {
+                    Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
+                    Date dateMax = simpleDateFormat.parse(inputDateMax.getText().toString());
+                    Date[] dateFilter = {dateMin, dateMax};
+
+                    parcoursList.clear();
+                    adapter.notifyDataSetChanged();
+                    fetchParcoursFromApi(userId, nameParcours, dateFilter);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+
+                dialog.dismiss();
+            }
+        });
+
+        // Gère le clic sur le bouton "Annuler"
+        annuler.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        // Affiche la fenêtre contextuelle
+        dialog.show();
     }
 
     /**
@@ -494,50 +489,71 @@ public class Accueil extends AppCompatActivity {
     }
 
     /**
-     * Configure l'écouteur du clic sur le bouton d'enregistrement de parcours.
+     * Méthode exécutée lorsque l'utilisateur clique sur le bouton d'enregistrement de parcours.
      */
-    private void saveParcoursListener() {
-        lancerParcoursButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Créé une instance de Dialog
-                final Dialog dialog = new Dialog(Accueil.this);
+    public void clickSaveParcours(View view) {
+        // Vérifie les permissions de l'utilisateur
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            showPermissionPopup();
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            showSaveParcoursPopup();
+        }
 
-                // Définis le contenu de la fenêtre contextuelle
-                dialog.setContentView(R.layout.popup_lancer_course);
+    }
 
-                // Récupére les éléments de la fenêtre contextuelle
-                EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
-                EditText inputName = dialog.findViewById(R.id.inputNom);
+    /**
+     * Affiche la popup des permissions manquantes.
+     */
+    private void showPermissionPopup() {
+        // Créé une instance de Dialog
+        final Dialog dialog = new Dialog(Accueil.this);
 
-                Button confirmer = dialog.findViewById(R.id.confirmer);
-                Button annuler = dialog.findViewById(R.id.annuler);
+        // Définis le contenu de la fenêtre contextuelle
+        dialog.setContentView(R.layout.popup_permission);
 
-                // Gère le clic sur le bouton "Confirmer"
-                confirmer.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
-                        addParcoursFromApi(parcours);
+        Button closeButton = dialog.findViewById(R.id.fermer);
 
-                        Intent intent = new Intent(Accueil.this, CourseActivity.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                    }
-                });
-
-                // Gère le clic sur le bouton "Annuler"
-                annuler.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                // Affiche la fenêtre contextuelle
-                dialog.show();
-            }
+        // Gère le clic sur le bouton "Fermer"
+        closeButton.setOnClickListener(view -> {
+            dialog.dismiss();
         });
+
+        dialog.show();
+    }
+
+
+    /**
+     * Affiche la popup d'enregistrement d'un parcours à l'écran.
+     */
+    private void showSaveParcoursPopup() {
+        // Créé une instance de Dialog
+        final Dialog dialog = new Dialog(Accueil.this);
+
+        // Définis le contenu de la fenêtre contextuelle
+        dialog.setContentView(R.layout.popup_lancer_course);
+
+        // Récupére les éléments de la fenêtre contextuelle
+        EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
+        EditText inputName = dialog.findViewById(R.id.inputNom);
+
+        Button confirmer = dialog.findViewById(R.id.confirmer);
+        Button annuler = dialog.findViewById(R.id.annuler);
+
+        // Gère le clic sur le bouton "Confirmer"
+        confirmer.setOnClickListener(view -> {
+            Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
+            addParcoursFromApi(parcours);
+
+            Intent intent = new Intent(Accueil.this, CourseActivity.class);
+            startActivity(intent);
+            dialog.dismiss();
+        });
+
+        // Gère le clic sur le bouton "Annuler"
+        annuler.setOnClickListener(view -> dialog.dismiss());
+
+        dialog.show();
     }
 }
 
