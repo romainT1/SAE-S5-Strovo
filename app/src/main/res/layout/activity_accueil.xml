@@ -21,7 +21,8 @@
             android:id="@+id/filter_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Filtres" />
+            android:text="Filtres"
+            android:onClick="clickFilter"/>
     </LinearLayout>
 
     <ListView
@@ -37,6 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="Enregistrer un parcours" />
+        android:text="Enregistrer un parcours"
+        android:onClick="clickSaveParcours"/>
 
 </RelativeLayout>

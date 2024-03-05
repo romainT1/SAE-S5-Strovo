@@ -79,10 +79,6 @@ public class CourseActivity extends AppCompatActivity {
 
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        // Demande la permission d'accéder à la localisation
-        ActivityCompat.requestPermissions(this,
-                new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-
         map = initMap();
         stopButton = initStopButton();
         parcours = new Parcours();
@@ -103,22 +99,6 @@ public class CourseActivity extends AppCompatActivity {
         map.getOverlays().add(myLocationNewOverlay);
 
         parcours.start();
-    }
-
-    /**
-     * Méthode exécutée lors d'une demande de permission.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Vérifie si l'utilisateur a donné les permissions ou non.
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(CourseActivity.this, "Permission Autorisée", Toast.LENGTH_SHORT).show();
-            // TODO voir quoi faire ??
-        } else {
-            Toast.makeText(CourseActivity.this, "Permission Refusée", Toast.LENGTH_SHORT).show();
-            // TODO voir quoi faire ??
-        }
     }
 
     /**
@@ -215,14 +195,15 @@ public class CourseActivity extends AppCompatActivity {
     }
 
     /** Initialise le gestionnaire de localisation de l'utilisateur.
-     * @return la l'écouteur initilisé
+     * @return le gestionnaire initilisé
      */
     private LocationManager initLocationManager() {
         LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO permissions manquantes que faire ?
+        // Vérification des permissions
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Défini une mise à jour automatique du gestionnaire de localisation
+            locationManager.requestLocationUpdates(LOCATION_PROVIDER, 3000, 2, locationListener);
         }
-        locationManager.requestLocationUpdates(LOCATION_PROVIDER, 3000, 2, locationListener);
         return locationManager;
     }
 
@@ -292,28 +273,27 @@ public class CourseActivity extends AppCompatActivity {
         Button confirmer = dialog.findViewById(R.id.btnConfirmer);
         Button annuler = dialog.findViewById(R.id.btnAnnuler);
 
+        // Quand l'utilisateur clique sur "Confirmer"
         confirmer.setOnClickListener(v -> {
             // TODO vérifier que l'input libelle est bien défini
-            // Vérification des permissions
-            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Vérification les permissions
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO afficher une popup ?
                 return;
             }
+
+            // Ajoute un point d'intérêt sur la position actuelle de l'utilisateur
             Location currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             GeoPoint point = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
             InterestPoint interestPoint = new InterestPoint(point,
                     inputLibelle.getText().toString(), inputDescription.getText().toString());
             addInterestPoint(interestPoint);
+
             dialog.dismiss();
         });
 
-        annuler.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        //TODO la popup doit renvoyer à l'activité le nom et description saisie par l'utilisateur
-        // TODO appeler la méthode addInterestPoint(interestPoint);
+        // Quand l'utilisateur clique sur "Annuler"
+        annuler.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }

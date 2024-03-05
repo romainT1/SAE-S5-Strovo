@@ -25,12 +25,17 @@
     <string name="ajouterPointInteret">Ajouter un point d\'interet</string>
     <string name="arreter">Arreter</string>
 
-    <!-- Popup boutons communs-->
-    <string name="confirmer">Confirmer</string>
-    <string name="annuler">Annuler</string>
-
     <!-- Popup modif parcours-->
     <string name="modifParcours">Modifier le parcours</string>
+
+    <!-- Popup permissions-->
+    <string name="titrePopupPermissions">Autorisations nécessaires</string>
+    <string name="descriptionPopupPermissions">Cette fonctionnalité nécessite des autorisations pour accès à votre localisation.</string>
+
+    <!-- Boutons communs-->
+    <string name="confirmer">Confirmer</string>
+    <string name="annuler">Annuler</string>
+    <string name="fermer">Fermer</string>
 
     <!-- Messages -->
     <string name="errConnexion">Identifiants incorrects</string>
