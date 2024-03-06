@@ -50,7 +50,7 @@
             android:id="@+id/floating_home_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Retourner à l'accueil" />
+            android:text="@string/retourAccueil" />
 
     </LinearLayout>
 
