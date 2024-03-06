@@ -16,10 +16,6 @@
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-
-
-
-
     <Button
         android:id="@+id/btnSupprimer"
         android:layout_width="match_parent"

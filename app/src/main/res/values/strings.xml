@@ -1,6 +1,22 @@
 <resources>
     <string name="app_name">Strovo</string>
 
+    <!-- Accueil  -->
+    <string name="filtres">Filtres</string>
+    <string name="enregistrerParcours">Enregistrer un parcours</string>
+
+    <!-- Connexion / Inscription  -->
+    <string name="email">Email</string>
+    <string name="mdp">Mot de passe</string>
+    <string name="connecter">Se connecter</string>
+    <string name="inscrire">S\'inscrire</string>
+    <string name="prenom">Prénom</string>
+    <string name="nom">Nom</string>
+
+    <!-- Course Synthèse  -->
+    <string name="retourAccueil">Retourner à l\'accueil</string>
+
+
     <!-- Menus Modification -->
     <string name="modifier">Modifier description</string>
     <string name="supprimer">Supprimer</string>

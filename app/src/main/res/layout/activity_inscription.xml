@@ -19,7 +19,7 @@
         android:background="@android:drawable/editbox_background"
         android:height="50dp"
         android:layout_marginBottom="10dp"
-        android:hint="Prénom"
+        android:hint="@string/prenom"
         android:inputType="text"
         android:maxLength="15"
         android:maxLines="0"/>
@@ -30,7 +30,7 @@
         android:background="@android:drawable/editbox_background"
         android:height="50dp"
         android:layout_marginBottom="10dp"
-        android:hint="Nom"
+        android:hint="@string/nom"
         android:inputType="text"
         android:maxLength="15"
         android:maxLines="1"/>
@@ -41,7 +41,7 @@
         android:background="@android:drawable/editbox_background"
         android:height="50dp"
         android:layout_marginBottom="10dp"
-        android:hint="Email"
+        android:hint="@string/email"
         android:inputType="textEmailAddress"
         android:maxLength="32"
         android:maxLines="1"/>
@@ -53,14 +53,14 @@
         android:layout_marginBottom="10dp"
         android:height="50dp"
         android:background="@android:drawable/editbox_background"
-        android:hint="Mot de passe"
+        android:hint="@string/mdp"
         android:inputType="textPassword"
         android:maxLength="64"
         android:maxLines="1"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="S'inscrire"
+        android:text="@string/inscrire"
         android:textSize="20sp"
         android:layout_marginTop="20dp"
         android:height="60dp"
@@ -73,7 +73,7 @@
         android:height="60dp"
         android:backgroundTint="#00C60F02"
         android:onClick="clicRetour"
-        android:text="Retour"
+        android:text="@string/retour"
         android:textColor="#F44336"
         android:textSize="20sp"
         app:strokeColor="#F44336"
