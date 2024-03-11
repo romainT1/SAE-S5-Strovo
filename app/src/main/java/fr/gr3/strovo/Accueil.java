@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -19,6 +20,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.app.Dialog;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -74,6 +76,9 @@ public class Accueil extends AppCompatActivity {
     /** Composant graphique du choix de la date dans le filtre */
     private DatePickerDialog picker;
 
+    /** Composant graphique du TextView quand aucun parcours est retourné. */
+    private TextView emptyParcoursText;
+
 
     /** Liste des parcours de l'utilisateur */
     private List<Parcours> parcoursList;
@@ -98,6 +103,12 @@ public class Accueil extends AppCompatActivity {
 
     /** Pour gérer le délai de l'appel à l'API */
     private Runnable runnable;
+
+    /** Handler pour gérer le délai sur le clic du bouton */
+    private Handler handlerButton;
+
+    /** Définit le status du clic sur le bouton */
+    private boolean longClickDetected;
 
     /**
      * Méthode appelée lors de la création de l'activité.
@@ -146,12 +157,17 @@ public class Accueil extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         parseJsonResponse(response);
+
+                        // Vérifie si la liste des parcours est vide
+                        if (parcoursList.isEmpty()) {
+                            emptyParcoursText.setVisibility(View.VISIBLE);
+                        }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println("ERREUR : " + error.getMessage());
+                        emptyParcoursText.setVisibility(View.VISIBLE);
                     }
                 });
 
@@ -174,7 +190,7 @@ public class Accueil extends AppCompatActivity {
                                                  parcoursJson.getString("description"),
                                                  parcoursJson.getString("id"
                                                  ));
-                //parcoursList.add(parcours);
+
                 adapter.add(parcours);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -294,6 +310,8 @@ public class Accueil extends AppCompatActivity {
         filterButton = findViewById(R.id.filter_button);
         listViewParcours = findViewById(R.id.list_view);
         lancerParcoursButton = findViewById(R.id.floating_action_button);
+        emptyParcoursText = findViewById(R.id.text_empty_parcours);
+        emptyParcoursText.setVisibility(View.INVISIBLE);
 
         // Initialisation de la liste des parcours
         parcoursList = new ArrayList<>();
@@ -315,7 +333,44 @@ public class Accueil extends AppCompatActivity {
 
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
+
+        // Configuration de l'écouteur du clic sur le bouton pour lancer le parcours
+        startParcoursListener();
     }
+
+    /**
+     * Ecouteurs d'événements du clic sur le bouton de lancement du parcours.
+     */
+    private void startParcoursListener() {
+        lancerParcoursButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        longClickDetected = false;
+                        handler.postDelayed(longClickRunnable, 3000); // Déclencher après 3 secondes
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(longClickRunnable);
+                        if (!longClickDetected) {
+                            // Si le clic est court (inférieur à 3 secondes)
+                            Toast.makeText(Accueil.this, R.string.erreurLancementParcours, Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                }
+                return true;
+            }
+        });
+    }
+
+    private Runnable longClickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Si le bouton est toujours enfoncé après 3 secondes
+            longClickDetected = true;
+            clickSaveParcours(lancerParcoursButton);
+        }
+    };
 
     @Override
     protected void onResume() {
