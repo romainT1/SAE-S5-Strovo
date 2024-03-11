@@ -4,6 +4,8 @@
     <!-- Accueil  -->
     <string name="filtres">Filtres</string>
     <string name="enregistrerParcours">Enregistrer un parcours</string>
+    <string name="erreurLancementParcours">Pour lancer un parcours, maintenez le clic sur le bouton pendant plus de 3 secondes.</string>
+    <string name="aucunParcours">Aucun parcours trouvé.</string>
 
     <!-- Connexion / Inscription  -->
     <string name="email">Email</string>
