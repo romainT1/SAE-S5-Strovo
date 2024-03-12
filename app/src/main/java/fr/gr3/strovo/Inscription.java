@@ -121,7 +121,7 @@ public class Inscription extends AppCompatActivity {
      * @param user utilisateur à enregistrer
      */
     private void inscription(User user) throws NoSuchAlgorithmException {
-        // Crée un objet JSON contenant les détails du parcours
+        // Crée un objet JSON contenant les détails de l'utilisateur
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("email", user.getEmail());
@@ -132,26 +132,29 @@ public class Inscription extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Crée une requête GET pour s'identifier à l'API
+        // Crée une requête POST pour l'inscription à l'API
         JsonObjectRequest request = new JsonObjectRequest(
-            Request.Method.POST, SIGNUP_URL, jsonObject,
-            response -> {
-                finish();
-            },
-            error -> {
-                String messageErreur = getString(R.string.err);
+                Request.Method.POST, SIGNUP_URL, jsonObject,
+                response -> {
+                    // Affiche un toast pour indiquer que l'inscription a réussi
+                    Toast.makeText(this, "Compte créé avec succès !", Toast.LENGTH_LONG).show();
+                    finish(); // Termine l'activité inscription
+                },
+                error -> {
+                    String messageErreur = getString(R.string.err);
 
-                /* Si erreur liée à un problème de conflit */
-                if (error.networkResponse != null) {
-                    if (error.networkResponse.statusCode == 409) {
-                        messageErreur = getString(R.string.errInscriptionConflict);
+                    // Si erreur liée à un problème de conflit
+                    if (error.networkResponse != null) {
+                        if (error.networkResponse.statusCode == 409) {
+                            messageErreur = getString(R.string.errInscriptionConflict);
+                        }
                     }
+                    Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
+                    Log.d("Erreur inscription", error.getMessage());
                 }
-                Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
-                Log.d("Erreur inscription", error.getMessage());
-            }
         );
-        // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
+        // Ajoute la requête à la file d'attente des requêtes HTTP
         requestQueue.add(request);
     }
+
 }
