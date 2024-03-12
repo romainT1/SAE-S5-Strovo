@@ -10,22 +10,26 @@ import java.util.List;
  */
 public class Parcours {
 
-    /** Indique si l'enregistrement du parcours est en cours */
+
+    /** Indique si le parcours est en cours d'enregistrement */
     private boolean running;
+
+    /** Indique si le parcours est en pause */
+    private boolean paused;
 
     /** Liste de toutes les positions enregistrées pour le parcours */
     private List<Location> locations;
 
-    /** Liste de touts les points d'intérêts enregistrées pour le parcours */
+    /** Liste de touts les points d'intérêts enregistrés pour le parcours */
     private List<InterestPoint> interestPoints;
 
     /** Durée du parcours */
     private float time;
 
-    /** Distance parcourue en mètre */
+    /** Distance parcourue en mètres */
     private float distance;
 
-    /** vitesse moyenne */
+    /** Vitesse moyenne */
     private float speed;
 
     /**
@@ -112,4 +116,28 @@ public class Parcours {
     public float getSpeed() {
         return speed;
     }
+
+    /**
+     * Met le parcours en pause.
+     */
+    public void pause() {
+        paused = true;
+        // Ajoutez ici tout ce qui doit être mis en pause, comme un timer si vous en avez un
+    }
+
+    /**
+     * Reprend le parcours.
+     */
+    public void resume() {
+        paused = false;
+        // Ajoutez ici tout ce qui doit être repris, comme un timer si vous en avez un
+    }
+
+    /**
+     * Vérifie si le parcours est en pause.
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
 }

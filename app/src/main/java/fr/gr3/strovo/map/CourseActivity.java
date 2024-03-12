@@ -66,6 +66,9 @@ public class CourseActivity extends AppCompatActivity {
     /** Element graphique: position actuelle de l'utilisateur */
     private MyLocationNewOverlay myLocationNewOverlay;
 
+    /** Indicateur de l'état du GPS */
+    private boolean gpsEnabled = true;
+
     /**
      * Méthode appelée lors de la création de l'activité.
      * Initialise les composants graphiques, configure les écouteurs d'événements
@@ -142,10 +145,13 @@ public class CourseActivity extends AppCompatActivity {
      * @return la l'écouteur initilisé
      */
     private LocationListener initLocationListener() {
-        LocationListener locationListener = new LocationListener() {
+        // Initialisation du gestionnaire de localisation et du listener
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
             // Méthode exécutée lors de la détection d'un changement de position de l'utilisateur
             @Override
-            public void onLocationChanged(@NonNull Location location) {
+            public void onLocationChanged(Location location) {
                 GeoPoint point = new GeoPoint(location.getLatitude(), location.getLongitude());
                 // Si course lancée
                 if (parcours.isRunning()) {
@@ -157,21 +163,26 @@ public class CourseActivity extends AppCompatActivity {
                 map.getController().setCenter(point);
 
                 Toast.makeText(getApplicationContext(), "Changement position", Toast.LENGTH_SHORT).show();
+
+
             }
 
             @Override
-            public void onProviderDisabled(@NonNull String provider) {
-                LocationListener.super.onProviderDisabled(provider);
-
-                Toast.makeText(getApplicationContext(), "Fournisseur désactivé", Toast.LENGTH_SHORT).show();
-                // TODO si on désactive le fournisseur
+            public void onProviderDisabled(String provider) {
+                // Mise en pause du parcours lorsque la localisation est désactivée
+                if (parcours.isRunning()) {
+                    parcours.pause();
+                    Toast.makeText(getApplicationContext(), "Localisation désactivée. Le parcours est mis en pause.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
-            public void onProviderEnabled(@NonNull String provider) {
-                LocationListener.super.onProviderEnabled(provider);
-                Toast.makeText(getApplicationContext(), "Fournisseur activé", Toast.LENGTH_SHORT).show();
-                // TODO si on active le fournisseur
+            public void onProviderEnabled(String provider) {
+                // Reprendre le parcours lorsque la localisation est réactivée
+                if (parcours.isPaused()) {
+                    parcours.resume();
+                    Toast.makeText(getApplicationContext(), "Localisation réactivée. Le parcours reprend.", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -192,6 +203,8 @@ public class CourseActivity extends AppCompatActivity {
             }
         };
         return locationListener;
+
+
     }
 
     /** Initialise le gestionnaire de localisation de l'utilisateur.
@@ -217,18 +230,33 @@ public class CourseActivity extends AppCompatActivity {
         return polyline;
     }
 
+    /**
+     * Met en pause le parcours sur la carte.
+     */
     @Override
     protected void onPause() {
         super.onPause();
         map.onPause();
-        // TODO mettre en pause ce qui peut être mis en pause
+
+        // Met le parcours en pause lorsque l'activité est mise en pause
+        if (parcours.isRunning()) {
+            parcours.pause();
+        }
     }
 
+    /**
+     * Reprend le parcours et l'affiche sur la carte.
+     *
+     */
     @Override
     protected void onResume() {
         super.onResume();
         map.onResume();
-        // TODO resume ce qui doit être resume
+
+        // Reprend le parcours lorsque l'activité reprend
+        if (parcours.isPaused()) {
+            parcours.resume();
+        }
     }
 
     /**
@@ -305,4 +333,6 @@ public class CourseActivity extends AppCompatActivity {
     private void saveParcours() {
         //TODO Méthode API pour enregistrer le parcours
     }
+
+
 }
