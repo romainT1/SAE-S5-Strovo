@@ -1,17 +1,13 @@
 package fr.gr3.strovo;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,15 +18,12 @@ import org.json.JSONException;
 
 import java.security.NoSuchAlgorithmException;
 
-import fr.gr3.strovo.map.CourseActivity;
+import fr.gr3.strovo.api.Endpoints;
 
 /**
  * Activité principale, page de connexion.
  */
 public class MainActivity extends AppCompatActivity {
-
-    /** Url pour la connexion */
-    private static final String LOGIN_URL = "http://10.2.14.27:8080/user/login?email=%s&password=%s";
 
     /** Clé pour le token transmis par l'activité accueil */
     public static final String EXTRA_TOKEN = "token";
@@ -88,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
      * @param password
      */
     private void connexion(String email, String password) throws NoSuchAlgorithmException {
-        String apiUrl = String.format(LOGIN_URL, email, PasswordHasher.hashPassword(password));
+        String apiUrl = String.format(Endpoints.LOGIN_URL, email, PasswordHasher.hashPassword(password));
         switchToAccueil("");
         // Crée une requête GET pour s'identifier à l'API
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(

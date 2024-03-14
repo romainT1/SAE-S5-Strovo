@@ -1,13 +1,11 @@
 package fr.gr3.strovo;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -24,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -49,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.map.CourseActivity;
 
 /**
@@ -60,12 +58,6 @@ public class Accueil extends AppCompatActivity {
 
     /** Clé du token */
     public static final String EXTRA_TOKEN = "token";
-
-    /** URL de l'API pour récupérer la liste des parcours de l'utilisateur */
-    private final String URL_LISTE_PARCOURS = "http://10.2.14.27:8080/parcours/utilisateur/%d";
-
-    /** URL de l'API pour ajouter ou supprimer un parcours */
-    private final String URL_PARCOURS = "http://172.20.10.14:8080/parcours";
 
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
@@ -153,8 +145,7 @@ public class Accueil extends AppCompatActivity {
      */
     private void fetchParcoursFromApi(int userId, String nameParcours, Date[] dateIntervalle) {
         //parcoursList.clear();
-        String urlModifie = URL_LISTE_PARCOURS;
-        String apiUrl = String.format(urlModifie, userId);
+        String apiUrl = String.format(Endpoints.GET_PARCOURS, userId);
 
         if (nameParcours != null && !nameParcours.equals("")) {
             apiUrl += "?nom=%s";
@@ -243,7 +234,7 @@ public class Accueil extends AppCompatActivity {
         }
 
         // Crée une requête JSON pour envoyer les détails du parcours à l'API
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL_PARCOURS, jsonObject,
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonObject,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -287,8 +278,7 @@ public class Accueil extends AppCompatActivity {
     public void deleteParcoursFromApi(Parcours parcours) {
 
         // Construit l'URL spécifique pour le parcours à supprimer
-        String urlModifie = URL_PARCOURS + "/%s";
-        String apiUrl = String.format(urlModifie, parcours.getId());
+        String apiUrl = String.format(Endpoints.DELETE_PARCOURS, parcours.getId());
 
         // Crée une requête DELETE pour supprimer le parcours de l'API
         StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, apiUrl,

@@ -24,13 +24,16 @@ public class Parcours {
     private List<InterestPoint> interestPoints;
 
     /** Durée du parcours */
-    private float time;
+    private long time;
+
+    /** Vitesse moyenne */
+    private float speed;
 
     /** Distance parcourue en mètres */
     private float distance;
 
-    /** Vitesse moyenne */
-    private float speed;
+    /** Dénivelé parcouru */
+    private double elevation;
 
     /**
      * Construit un parcours.
@@ -39,9 +42,10 @@ public class Parcours {
         running = false;
         locations = new ArrayList<>();
         interestPoints = new ArrayList<>();
-        time = 0.0f;
-        distance = 0.0f;
+        time = 0;
         speed = 0.0f;
+        distance = 0.0f;
+        elevation = 0.0f;
     }
 
     /**
@@ -93,14 +97,33 @@ public class Parcours {
         if (locations.size() > 1) {
             // Calcul de la distance
             for (int i = 0; i < locations.size()-1; i++) {
-                distance += locations.get(i).distanceTo(locations.get(i+1));
+                Location actual = locations.get(i);
+                Location next = locations.get(i+1);
+                distance += actual.distanceTo(next);
             }
 
             // Calcul de la vitesse
             speed = distance / time;
 
-            // TODO calculer dénivelé
+            // Calcul du dénivelé
+            Location firstLocation = locations.get(0);
+            Location lastLocation = locations.get(locations.size()-1);
+            elevation = lastLocation.getAltitude() - firstLocation.getAltitude();
         }
+    }
+
+    /**
+     * @return durée du parcours
+     */
+    public long getTime() {
+        return time;
+    }
+
+    /**
+     * @return vitesse moyenne
+     */
+    public float getSpeed() {
+        return speed;
     }
 
     /**
@@ -111,10 +134,10 @@ public class Parcours {
     }
 
     /**
-     * @return vitesse moyenne
+     * @return dénivelé parcouru
      */
-    public float getSpeed() {
-        return speed;
+    public double getElevation() {
+        return elevation;
     }
 
     /**
@@ -139,5 +162,4 @@ public class Parcours {
     public boolean isPaused() {
         return paused;
     }
-
 }
