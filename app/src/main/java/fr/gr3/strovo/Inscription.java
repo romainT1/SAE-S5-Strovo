@@ -1,6 +1,5 @@
 package fr.gr3.strovo;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,31 +8,23 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 
-import fr.gr3.strovo.model.User;
+import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.model.User;
 
 /**
  * Activité inscription.
  */
 public class Inscription extends AppCompatActivity {
-
-    /** Url pour l'inscription */
-    private static final String SIGNUP_URL = "http://10.2.14.27:8080/user/signup";
 
     /** Champ de saisie du prénom */
     private EditText firstname;
@@ -134,7 +125,7 @@ public class Inscription extends AppCompatActivity {
 
         // Crée une requête POST pour l'inscription à l'API
         JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.POST, SIGNUP_URL, jsonObject,
+                Request.Method.POST, Endpoints.SIGNUP_URL, jsonObject,
                 response -> {
                     // Affiche un toast pour indiquer que l'inscription a réussi
                     Toast.makeText(this, "Compte créé avec succès !", Toast.LENGTH_LONG).show();
