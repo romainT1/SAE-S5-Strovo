@@ -23,7 +23,7 @@ public class Route {
     private final float distance;
 
     /** Dénivelé du parcours. */
-    private final float elevation;
+    private final double elevation;
 
     /** Liste des identifiants des points d'intêrets associés au parcours. */
     private String[] interestPointsIds;
@@ -31,7 +31,7 @@ public class Route {
     /** Listes des coordonnées des points enregistrés formant le parcours. */
     private final double[][] coordinates;
 
-    public Route(String name, String description, Date date, long time, float averageSpeed, float distance, float elevation, String[] interestPointsIds, double[][] coordinates) {
+    public Route(String name, String description, Date date, long time, float averageSpeed, float distance, double elevation, String[] interestPointsIds, double[][] coordinates) {
         this.name = name;
         this.description = description;
         this.date = date;
@@ -76,7 +76,7 @@ public class Route {
     }
 
 
-    public float getElevation() {
+    public double getElevation() {
         return elevation;
     }
 

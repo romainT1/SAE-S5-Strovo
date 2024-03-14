@@ -158,6 +158,7 @@ public class CourseActivity extends AppCompatActivity {
                     // Met à jour le parcours
                     parcours.addLocation(location);
                     polyline.addPoint(point);
+                    Log.d("LOGG APPLI", "Ajout dun nouveau point");
                 }
                 // Centre la map sur la position de l'utilisateur
                 map.getController().setCenter(point);

@@ -59,9 +59,6 @@ public class Accueil extends AppCompatActivity {
     /** Clé du token */
     public static final String EXTRA_TOKEN = "token";
 
-    /** URL de l'API pour ajouter ou supprimer un parcours */
-    private final String URL_PARCOURS = "http://172.20.10.14:8080/parcours";
-
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
 
@@ -237,7 +234,7 @@ public class Accueil extends AppCompatActivity {
         }
 
         // Crée une requête JSON pour envoyer les détails du parcours à l'API
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, URL_PARCOURS, jsonObject,
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonObject,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -281,8 +278,7 @@ public class Accueil extends AppCompatActivity {
     public void deleteParcoursFromApi(Parcours parcours) {
 
         // Construit l'URL spécifique pour le parcours à supprimer
-        String urlModifie = URL_PARCOURS + "/%s";
-        String apiUrl = String.format(urlModifie, parcours.getId());
+        String apiUrl = String.format(Endpoints.DELETE_PARCOURS, parcours.getId());
 
         // Crée une requête DELETE pour supprimer le parcours de l'API
         StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, apiUrl,
