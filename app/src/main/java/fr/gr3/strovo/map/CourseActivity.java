@@ -17,18 +17,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
@@ -83,6 +81,9 @@ public class CourseActivity extends AppCompatActivity {
     /** Indicateur de l'état du GPS */
     private boolean gpsEnabled = true;
 
+    /** Queue pour effectuer la requête HTTP */
+    private RequestQueue requestQueue;
+
     /**
      * Méthode appelée lors de la création de l'activité.
      * Initialise les composants graphiques, configure les écouteurs d'événements
@@ -96,9 +97,10 @@ public class CourseActivity extends AppCompatActivity {
 
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
+        requestQueue = Volley.newRequestQueue(this);
         map = initMap();
         stopButton = initStopButton();
-        parcours = new Parcours();
+        parcours = new Parcours(1,"A changer", "A changer", new Date()); // TODO changer
         locationListener = initLocationListener();
         locationManager = initLocationManager();
 
@@ -147,7 +149,8 @@ public class CourseActivity extends AppCompatActivity {
             ecouteurGPS = null;*/
 
             // TODO Sauvegarder parcours
-            saveParcours();
+            parcours.stop();
+            addParcoursToApi(parcours);
             finish(); // Termine l'activité
             return true;
         });
@@ -286,7 +289,7 @@ public class CourseActivity extends AppCompatActivity {
         Marker marker = new Marker(map);
         marker.setPosition(interestPoint.getPoint());
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setTitle(interestPoint.getTitle());// TODO voir si on affiche le titre ou la description
+        marker.setTitle(interestPoint.getName());// TODO voir si on affiche le titre ou la description
         marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
@@ -345,6 +348,7 @@ public class CourseActivity extends AppCompatActivity {
      * Envoie une requête POST à l'API pour ajouter un nouveau parcours.
      * @param parcours Le parcours à ajouter.
      */
+
     public void addParcoursToApi(Parcours parcours) {
         // Crée un objet JSON contenant les détails du parcours
         JSONObject jsonObject = new JSONObject();
@@ -370,17 +374,14 @@ public class CourseActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }*/
 
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // En cas d'erreur de l'API, cette méthode est appelée
-            }
-        })
+                }, error -> {
+                    // En cas d'erreur de l'API, cette méthode est appelée
+                })
         {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + userToken);
+                //headers.put("Authorization", "Bearer " + userToken);
                 return headers;
             }
         };

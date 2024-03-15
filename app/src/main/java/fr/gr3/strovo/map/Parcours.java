@@ -1,11 +1,14 @@
 package fr.gr3.strovo.map;
 
 import android.location.Location;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osmdroid.util.GeoPoint;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +23,9 @@ public class Parcours {
 
     /** Indique si le parcours est en pause */
     private boolean paused;
+
+    /** Identifiant de l'utilisateur */
+    private int userId;
 
     /** Nom du parcours */
     private String nom;
@@ -51,12 +57,13 @@ public class Parcours {
     /**
      * Construit un parcours.
      */
-    public Parcours(String nom, String description, Date date) {
+    public Parcours(int userId, String nom, String description, Date date) {
         this.running = false;
+        this.userId = userId;
         this.nom = nom;
         this.description = description;
         this.date = date;
-        this.time = 0;
+        this.time = 1;
         this.speed = 0.0f;
         this.distance = 0.0f;
         this.elevation = 0.0f;
@@ -158,21 +165,31 @@ public class Parcours {
      */
     public JSONObject toJson() throws JSONException {
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("userId", userId);
         jsonObject.put("name", nom);
         jsonObject.put("description", description);
-        jsonObject.put("date", date);
+        jsonObject.put("date", new SimpleDateFormat("yyyy-MM-dd").format(date));
         jsonObject.put("time", time);
-        jsonObject.put("averageSpeed", speed);
+        jsonObject.put("speed", speed);
         jsonObject.put("distance", distance);
         jsonObject.put("elevation", elevation);
-        jsonObject.put("interestPoints", new JSONArray(interestPoints).toString());
 
-        List<Double[]> coordinates = new ArrayList<>();
-        for (Location location : locations) {
-            coordinates.add(new Double[]{location.getLatitude(), location.getLongitude()});
+        // Conversion des points d'intêrets
+        JSONArray jsonInterestPoints = new JSONArray();
+        for (InterestPoint interestPoint : interestPoints) {
+            jsonInterestPoints.put(interestPoint.toJson());
         }
-        jsonObject.put("coordinates", new JSONArray(coordinates).toString());
-        
+        jsonObject.put("interestPoints", jsonInterestPoints);
+
+        // Convertion des coordonnées
+        JSONArray jsonCoordinates = new JSONArray();
+        for (Location location : locations) {
+            jsonCoordinates.put(new JSONArray()
+                    .put(location.getLatitude())
+                    .put(location.getLongitude()));
+        }
+        jsonObject.put("coordinates", jsonCoordinates);
+
         return jsonObject;
     }
 }
