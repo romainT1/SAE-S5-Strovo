@@ -22,6 +22,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -32,7 +41,12 @@ import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import fr.gr3.strovo.R;
+import fr.gr3.strovo.api.Endpoints;
 
 public class CourseActivity extends AppCompatActivity {
 
@@ -327,12 +341,52 @@ public class CourseActivity extends AppCompatActivity {
         dialog.show();
     }
 
-
     /**
-     * Envoie le parcours à l'API, si erreur, enregistre le parcours en local.
+     * Envoie une requête POST à l'API pour ajouter un nouveau parcours.
+     * @param parcours Le parcours à ajouter.
      */
-    private void saveParcours() {
-        //TODO Méthode API pour enregistrer le parcours
+    public void addParcoursToApi(Parcours parcours) {
+        // Crée un objet JSON contenant les détails du parcours
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject = parcours.toJson();
+        } catch (JSONException e) {
+            Toast.makeText(getApplicationContext(),"Une erreur s'est produite", Toast.LENGTH_SHORT);
+        }
+
+        // Crée une requête JSON pour envoyer les détails du parcours à l'API
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonObject,
+                (Response.Listener<JSONObject>) response -> {
+                    /*try {
+                        // On récupère l'objet Parcours de la réponse
+                        JSONObject parcoursObject = response.getJSONObject("parcours");
+
+                        String parcoursName = parcoursObject.getString("name");
+                        String parcoursDescription = parcoursObject.getString("description");
+                        String parcoursDate = parcoursObject.getString("date");
+                        Parcours parcours = new Parcours(parcoursName, parcoursDate, parcoursDescription);
+                        adapter.add(parcours);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }*/
+
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // En cas d'erreur de l'API, cette méthode est appelée
+            }
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + userToken);
+                return headers;
+            }
+        };
+
+        // Ajoute la requête à la file d'attente des requêtes HTTP
+        requestQueue.add(request);
     }
 
 

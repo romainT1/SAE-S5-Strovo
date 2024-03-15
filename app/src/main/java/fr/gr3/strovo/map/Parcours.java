@@ -2,7 +2,12 @@ package fr.gr3.strovo.map;
 
 import android.location.Location;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -10,18 +15,20 @@ import java.util.List;
  */
 public class Parcours {
 
-
     /** Indique si le parcours est en cours d'enregistrement */
     private boolean running;
 
     /** Indique si le parcours est en pause */
     private boolean paused;
 
-    /** Liste de toutes les positions enregistrées pour le parcours */
-    private List<Location> locations;
+    /** Nom du parcours */
+    private String nom;
 
-    /** Liste de touts les points d'intérêts enregistrés pour le parcours */
-    private List<InterestPoint> interestPoints;
+    /** Description du parcours. */
+    private String description;
+    
+    /** Date de création du parcours */
+    private Date date;
 
     /** Durée du parcours */
     private long time;
@@ -35,17 +42,26 @@ public class Parcours {
     /** Dénivelé parcouru */
     private double elevation;
 
+    /** Liste de touts les points d'intérêts enregistrés pour le parcours */
+    private List<InterestPoint> interestPoints;
+
+    /** Liste de toutes les positions enregistrées pour le parcours */
+    private List<Location> locations;
+
     /**
      * Construit un parcours.
      */
-    public Parcours() {
-        running = false;
-        locations = new ArrayList<>();
-        interestPoints = new ArrayList<>();
-        time = 0;
-        speed = 0.0f;
-        distance = 0.0f;
-        elevation = 0.0f;
+    public Parcours(String nom, String description, Date date) {
+        this.running = false;
+        this.nom = nom;
+        this.description = description;
+        this.date = date;
+        this.time = 0;
+        this.speed = 0.0f;
+        this.distance = 0.0f;
+        this.elevation = 0.0f;
+        this.interestPoints = new ArrayList<>();
+        this.locations = new ArrayList<>();
     }
 
     /**
@@ -113,34 +129,6 @@ public class Parcours {
     }
 
     /**
-     * @return durée du parcours
-     */
-    public long getTime() {
-        return time;
-    }
-
-    /**
-     * @return vitesse moyenne
-     */
-    public float getSpeed() {
-        return speed;
-    }
-
-    /**
-     * @return distance parcourue
-     */
-    public float getDistance() {
-        return distance;
-    }
-
-    /**
-     * @return dénivelé parcouru
-     */
-    public double getElevation() {
-        return elevation;
-    }
-
-    /**
      * Met le parcours en pause.
      */
     public void pause() {
@@ -161,5 +149,30 @@ public class Parcours {
      */
     public boolean isPaused() {
         return paused;
+    }
+
+    /**
+     * Convertit le parcours en objet json.
+     * @return un objet Json
+     * @throws JSONException si une erreur se produit durant la conversion
+     */
+    public JSONObject toJson() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", nom);
+        jsonObject.put("description", description);
+        jsonObject.put("date", date);
+        jsonObject.put("time", time);
+        jsonObject.put("averageSpeed", speed);
+        jsonObject.put("distance", distance);
+        jsonObject.put("elevation", elevation);
+        jsonObject.put("interestPoints", new JSONArray(interestPoints).toString());
+
+        List<Double[]> coordinates = new ArrayList<>();
+        for (Location location : locations) {
+            coordinates.add(new Double[]{location.getLatitude(), location.getLongitude()});
+        }
+        jsonObject.put("coordinates", new JSONArray(coordinates).toString());
+        
+        return jsonObject;
     }
 }
