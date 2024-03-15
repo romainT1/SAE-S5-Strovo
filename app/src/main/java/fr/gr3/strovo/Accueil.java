@@ -48,6 +48,7 @@ import java.util.Map;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.map.CourseActivity;
+import fr.gr3.strovo.utils.SharedPrefManager;
 
 /**
  * Classe représentant l'activité principale de l'application, correspondant à l'écran d'accueil.
@@ -122,6 +123,12 @@ public class Accueil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
+        if (!SharedPrefManager.getInstance(this).isLoggedIn()) {
+            Intent intent = new Intent(Accueil.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
         // TODO : Récupérer l'id du User dans les préférences
         userId = 1;
 
@@ -175,7 +182,14 @@ public class Accueil extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        emptyParcoursText.setVisibility(View.VISIBLE);
+                        if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
+                            SharedPrefManager.getInstance(Accueil.this).logout();
+                            Intent intent = new Intent(Accueil.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            emptyParcoursText.setVisibility(View.VISIBLE);
+                        }
                     }
                 })
         {

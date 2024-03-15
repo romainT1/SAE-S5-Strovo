@@ -19,6 +19,7 @@ import org.json.JSONException;
 import java.security.NoSuchAlgorithmException;
 
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.utils.SharedPrefManager;
 
 /**
  * Activité principale, page de connexion.
@@ -82,15 +83,14 @@ public class MainActivity extends AppCompatActivity {
      */
     private void connexion(String email, String password) throws NoSuchAlgorithmException {
         String apiUrl = String.format(Endpoints.LOGIN_URL, email, PasswordHasher.hashPassword(password));
-        switchToAccueil("");
-        // Crée une requête GET pour s'identifier à l'API
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET, apiUrl, null,
                 response -> {
                     try {
                         String token = response.getString("value");
+                        SharedPrefManager.getInstance(this).saveToken(token);
                         switchToAccueil(token);
-
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
