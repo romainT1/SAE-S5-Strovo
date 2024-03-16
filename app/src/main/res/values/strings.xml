@@ -18,6 +18,7 @@
     <string name="retourAccueil">Retourner à l\'accueil</string>
 
     <!-- Map  -->
+    <string name="erreurLancementParcours">Erreur lancement parcours</string>
     <string name="erreurArretParcours">Pour arrêter un parcours, maintenez le clic sur le bouton pendant plus de 3 secondes.</string>
 
     <!-- Menus Modification -->
