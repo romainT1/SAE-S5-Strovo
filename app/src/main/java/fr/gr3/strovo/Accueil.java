@@ -55,7 +55,6 @@ import java.util.Map;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.map.CourseActivity;
-import fr.gr3.strovo.utils.SharedPrefManager;
 
 
 /**
@@ -152,7 +151,7 @@ public class Accueil extends AppCompatActivity {
         setContentView(R.layout.activity_accueil);
 
 
-        if (!SharedPrefManager.getInstance(this).isLoggedIn()) {
+        if (!TokenManager.getInstance(this).isLoggedIn()) {
             Intent intent = new Intent(Accueil.this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -220,7 +219,7 @@ public class Accueil extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
-                            SharedPrefManager.getInstance(Accueil.this).logout();
+                            TokenManager.getInstance(Accueil.this).logout();
                             Intent intent = new Intent(Accueil.this, MainActivity.class);
                             startActivity(intent);
                             finish();
