@@ -18,17 +18,15 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Polyline;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.model.Route;
@@ -39,7 +37,7 @@ public class CourseSynthese extends AppCompatActivity {
     /** Clé de l'id du parcours */
     public static final String PARCOURS_ID = "PARCOURS_ID";
 
-    private MapView mapView;
+    private MapView map;
 
     /** Element graphique: Tracé du parcours */
     private Polyline polyline;
@@ -52,10 +50,10 @@ public class CourseSynthese extends AppCompatActivity {
         setContentView(R.layout.activity_course_synthese);
         btnRetour = findViewById(R.id.floating_home_button);
 
-        mapView = initMap();
+        map = initMap();
 
         polyline = initPolyline();
-        mapView.getOverlays().add(polyline);
+        map.getOverlays().add(polyline);
 
 
         btnRetour.setOnClickListener(new View.OnClickListener() {
@@ -107,6 +105,7 @@ public class CourseSynthese extends AppCompatActivity {
 
                     @Override
                     public void onResponse(JSONObject response) {
+
                         try {
                             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
                             // Extrayez les différentes propriétés de l'objet JSON
@@ -114,34 +113,31 @@ public class CourseSynthese extends AppCompatActivity {
                             String description = response.isNull("description") ? null : response.getString("description");
                             Date date = response.isNull("date") ? null : formatter.parse(response.getString("date"));
                             long time = response.isNull("time") ? 0 : response.getLong("time");
-                            float averageSpeed = response.isNull("averageSpeed") ? 0 : (float) response.getDouble("averageSpeed");
+                            float speed = response.isNull("speed") ? 0 : (float) response.getDouble("speed");
                             float distance = response.isNull("distance") ? 0 : (float) response.getDouble("distance");
                             double elevation = response.isNull("elevation") ? 0 : response.getDouble("elevation");
 
                             // Conversion des points d'intérêt (si présents)
-                            InterestPoint[] interestPoints = null;
+                            List<InterestPoint> interestPoints = new ArrayList<>();
                             JSONArray interestPointsJson = response.isNull("interestPoints") ? null : response.getJSONArray("interestPoints");
                             if (interestPointsJson != null) {
-                                interestPoints = new InterestPoint[interestPointsJson.length()];
                                 for (int i = 0; i < interestPointsJson.length(); i++) {
                                     JSONObject interestPointJson = interestPointsJson.getJSONObject(i);
-                                    interestPoints[i] = InterestPoint.fromJson(interestPointJson);
+                                    interestPoints.add(InterestPoint.fromJson(interestPointJson));
                                 }
                             }
 
-                            double[][] coordinates = null;
+                            List<double[]> coordinates = new ArrayList<>();
                             JSONArray coordinatesJson = response.isNull("coordinates") ? null : response.getJSONArray("coordinates");
                             if (coordinatesJson != null) {
-                                coordinates = new double[coordinatesJson.length()][2];
                                 for (int i = 0; i < coordinatesJson.length(); i++) {
                                     JSONArray coordinate = coordinatesJson.getJSONArray(i);
-                                    coordinates[i][0] = coordinate.getDouble(0);
-                                    coordinates[i][1] = coordinate.getDouble(1);
+                                    coordinates.add(new double[] {coordinate.getDouble(0), coordinate.getDouble(1)});
                                 }
                             }
 
                             // Créez un nouvel objet Route avec les données extraites
-                            Route route = new Route(name, description, date, time, averageSpeed, distance, elevation, interestPoints, coordinates);
+                            Route route = new Route(1, name, description, date, time, speed, distance, elevation, interestPoints, coordinates);
 
                             chargerParcours(route);
                         } catch (JSONException e) {
@@ -164,23 +160,24 @@ public class CourseSynthese extends AppCompatActivity {
     }
 
     private void chargerParcours(Route route) {
-        double[][] coordinates = route.getCoordinates();
+        List<double[]> coordinates = route.getCoordinates();
         for (double[] coordinate: coordinates) {
             GeoPoint point = new GeoPoint(coordinate[0], coordinate[1]);
             polyline.addPoint(point);
         }
-        mapView.invalidate();
+        map.invalidate();
+        map.getController().setCenter(new GeoPoint(coordinates.get(0)[0], coordinates.get(0)[1]));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();  // Needed for compass, my location overlays, v6.0.0 and up
+        map.onResume();  // Needed for compass, my location overlays, v6.0.0 and up
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mapView.onPause();  // Needed for compass, my location overlays, v6.0.0 and up
+        map.onPause();  // Needed for compass, my location overlays, v6.0.0 and up
     }
 }
