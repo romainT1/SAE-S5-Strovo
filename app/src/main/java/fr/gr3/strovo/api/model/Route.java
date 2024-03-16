@@ -7,14 +7,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import fr.gr3.strovo.map.InterestPoint;
 
 public class Route {
 
     /** Identifiant de l'utilisateur. */
-    private int userId;
+    private final int userId;
 
     /** Nom du parcours. */
     private String name;
@@ -26,24 +30,41 @@ public class Route {
     private final Date date;
 
     /** Durée du parcours en millisecondes. */
-    private final long time;
+    private long time;
 
     /** Vitesse moyenne. */
-    private final float speed;
+    private float speed;
 
-    /** Distance parcourue en mètre. */
-    private final float distance;
+    /** Distance parcourue en mètres. */
+    private float distance;
 
     /** Dénivelé du parcours. */
-    private final double elevation;
+    private double elevation;
 
     /** Liste des identifiants des points d'intêrets associés au parcours. */
-    private InterestPoint[] interestPoints;
+    private List<InterestPoint> interestPoints;
 
     /** Listes des coordonnées des points enregistrés formant le parcours. */
-    private final double[][] coordinates;
+    private List<double[]> coordinates;
 
-    public Route(String name, String description, Date date, long time, float speed, float distance, double elevation, InterestPoint[] interestPoints, double[][] coordinates) {
+    /**
+     * Construit un parcours.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param name nom du parcours
+     * @param description description du parcours
+     * @param date date du parcours
+     * @param time durée du parcours
+     * @param speed vitesse du parcours
+     * @param distance distance parcourue
+     * @param elevation dénivelé du parcours
+     * @param interestPoints liste des points d'intêrets associés au parcours
+     * @param coordinates liste de coordonnées de points formant le parcours
+     */
+    public Route(int userId, String name, String description, Date date,
+                 long time, float speed, float distance, double elevation,
+                 List<InterestPoint> interestPoints, List<double[]> coordinates) {
+        this.userId = userId;
         this.name = name;
         this.description = description;
         this.date = date;
@@ -55,12 +76,29 @@ public class Route {
         this.coordinates = coordinates;
     }
 
-    public int getUserId() {
-        return userId;
+    /**
+     * Construit un parcours.
+     *
+     * @param userId identifiant de l'utilisateur
+     * @param name nom du parcours
+     * @param description description du parcours
+     * @param date date du parcours
+     */
+    public Route(int userId, String name, String description, Date date) {
+        this.userId = userId;
+        this.name = name;
+        this.description = description;
+        this.date = date;
+        this.time = 0;
+        this.speed = 0;
+        this.distance = 0;
+        this.elevation = 0;
+        this.interestPoints = new ArrayList<>();
+        this.coordinates = new ArrayList<>();
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public int getUserId() {
+        return userId;
     }
 
     public String getName() {
@@ -87,29 +125,50 @@ public class Route {
         return time;
     }
 
+    public void setTime(long time) {
+        this.time = time;
+    }
+
     public float getSpeed() {
         return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
     }
 
     public float getDistance() {
         return distance;
     }
 
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
     public double getElevation() {
         return elevation;
     }
 
-    public InterestPoint[] getInterestPoints() {
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
+    }
+
+    public List<InterestPoint> getInterestPoints() {
         return interestPoints;
     }
 
-    public void setInterestPoints(InterestPoint[] interestPoints) {
+    public void setInterestPoints(List<InterestPoint> interestPoints) {
         this.interestPoints = interestPoints;
     }
 
-    public double[][] getCoordinates() {
+    public List<double[]> getCoordinates() {
         return coordinates;
     }
+
+    public void setCoordinates(List<double[]> coordinates) {
+        this.coordinates = coordinates;
+    }
+
     /**
      * Convertit le parcours en objet json.
      * @return un objet Json
@@ -135,10 +194,10 @@ public class Route {
 
         // Convertion des coordonnées
         JSONArray jsonCoordinates = new JSONArray();
-        for (double[] coordinatePoint : coordinates) {
+        for (double[] coordinatesPoint : coordinates) {
             jsonCoordinates.put(new JSONArray()
-                    .put(coordinatePoint[0])
-                    .put(coordinatePoint[1]));
+                    .put(coordinatesPoint[0])
+                    .put(coordinatesPoint[1]));
         }
         jsonObject.put("coordinates", jsonCoordinates);
 
