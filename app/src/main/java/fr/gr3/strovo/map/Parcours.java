@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import fr.gr3.strovo.api.model.Route;
+
 /**
  * Représente un parcours.
  */
@@ -24,32 +26,8 @@ public class Parcours {
     /** Indique si le parcours est en pause */
     private boolean paused;
 
-    /** Identifiant de l'utilisateur */
-    private int userId;
-
-    /** Nom du parcours */
-    private String nom;
-
-    /** Description du parcours. */
-    private String description;
-    
-    /** Date de création du parcours */
-    private Date date;
-
-    /** Durée du parcours */
-    private long time;
-
-    /** Vitesse moyenne */
-    private float speed;
-
-    /** Distance parcourue en mètres */
-    private float distance;
-
-    /** Dénivelé parcouru */
-    private double elevation;
-
-    /** Liste de touts les points d'intérêts enregistrés pour le parcours */
-    private List<InterestPoint> interestPoints;
+    /** Parcours de l'utilisateur */
+   private Route route;
 
     /** Liste de toutes les positions enregistrées pour le parcours */
     private List<Location> locations;
@@ -57,17 +35,9 @@ public class Parcours {
     /**
      * Construit un parcours.
      */
-    public Parcours(int userId, String nom, String description, Date date) {
+    public Parcours(int userId, String name, String description, Date date) {
         this.running = false;
-        this.userId = userId;
-        this.nom = nom;
-        this.description = description;
-        this.date = date;
-        this.time = 1;
-        this.speed = 0.0f;
-        this.distance = 0.0f;
-        this.elevation = 0.0f;
-        this.interestPoints = new ArrayList<>();
+        this.route = new Route(userId, name, description, date);
         this.locations = new ArrayList<>();
     }
 
@@ -89,6 +59,7 @@ public class Parcours {
         // Si c'est la première position du parcours ou si l'utilisateur s'est déplacé d'au moins 2 mètres
         if (locations.size() == 0 || location.distanceTo(locations.get(locations.size() - 1)) >= 2) {
             locations.add(location);
+            route.getCoordinates().add(new double[] {location.getLatitude(), location.getLongitude()});
         }
     }
 
@@ -97,7 +68,7 @@ public class Parcours {
      * @param interestPoint point d'intérêt
      */
     public void addInterestPoint(InterestPoint interestPoint) {
-        interestPoints.add(interestPoint);
+        route.getInterestPoints().add(interestPoint);
     }
 
     public void start() {
@@ -111,28 +82,50 @@ public class Parcours {
         calculateStatistics();
     }
 
-
     /**
-     * Calcule les statistiques du parcours.
+     * Calcule les statistiques du parcours effectué par l'utilisateur.
      */
     private void calculateStatistics() {
         // Si il y a plus d'une position enregistrée
         if (locations.size() > 1) {
-            // Calcul de la distance
-            for (int i = 0; i < locations.size()-1; i++) {
-                Location actual = locations.get(i);
-                Location next = locations.get(i+1);
-                distance += actual.distanceTo(next);
-            }
+            long time = 1; // TODO changer
+            float distance = calculateDistance();
+            double elevation = calculateElevation();
 
-            // Calcul de la vitesse
-            speed = distance / time;
-
-            // Calcul du dénivelé
-            Location firstLocation = locations.get(0);
-            Location lastLocation = locations.get(locations.size()-1);
-            elevation = lastLocation.getAltitude() - firstLocation.getAltitude();
+            route.setTime(time);
+            route.setDistance(distance);
+            route.setSpeed(distance / time);
+            route.setElevation(elevation);
         }
+    }
+
+    /**
+     * Calcule la distance parcourue.
+     * @return le distance en mètres
+     */
+    private float calculateDistance() {
+        float distance = 0;
+        for (int i = 0; i < locations.size()-1; i++) {
+            Location actual = locations.get(i);
+            Location next = locations.get(i+1);
+            distance += actual.distanceTo(next);
+        }
+        return distance;
+    }
+
+
+    /**
+     * Calcule le dénivelé du parcours.
+     * @return le dénivelé en mètres
+     */
+    private double calculateElevation() {
+        Location firstLocation = locations.get(0);
+        Location lastLocation = locations.get(locations.size()-1);
+        return lastLocation.getAltitude() - firstLocation.getAltitude();
+    }
+
+    public Route getRoute() {
+        return route;
     }
 
     /**
@@ -156,40 +149,5 @@ public class Parcours {
      */
     public boolean isPaused() {
         return paused;
-    }
-
-    /**
-     * Convertit le parcours en objet json.
-     * @return un objet Json
-     * @throws JSONException si une erreur se produit durant la conversion
-     */
-    public JSONObject toJson() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("userId", userId);
-        jsonObject.put("name", nom);
-        jsonObject.put("description", description);
-        jsonObject.put("date", new SimpleDateFormat("yyyy-MM-dd").format(date));
-        jsonObject.put("time", time);
-        jsonObject.put("speed", speed);
-        jsonObject.put("distance", distance);
-        jsonObject.put("elevation", elevation);
-
-        // Conversion des points d'intêrets
-        JSONArray jsonInterestPoints = new JSONArray();
-        for (InterestPoint interestPoint : interestPoints) {
-            jsonInterestPoints.put(interestPoint.toJson());
-        }
-        jsonObject.put("interestPoints", jsonInterestPoints);
-
-        // Convertion des coordonnées
-        JSONArray jsonCoordinates = new JSONArray();
-        for (Location location : locations) {
-            jsonCoordinates.put(new JSONArray()
-                    .put(location.getLatitude())
-                    .put(location.getLongitude()));
-        }
-        jsonObject.put("coordinates", jsonCoordinates);
-
-        return jsonObject;
     }
 }

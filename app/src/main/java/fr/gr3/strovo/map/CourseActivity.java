@@ -387,7 +387,7 @@ public class CourseActivity extends AppCompatActivity {
         // Crée un objet JSON contenant les détails du parcours
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject = parcours.toJson();
+            jsonObject = parcours.getRoute().toJson();
         } catch (JSONException e) {
             Toast.makeText(getApplicationContext(),"Une erreur s'est produite", Toast.LENGTH_SHORT);
         }
