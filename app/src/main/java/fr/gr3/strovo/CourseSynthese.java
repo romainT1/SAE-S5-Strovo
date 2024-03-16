@@ -22,6 +22,11 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Polyline;
 
+import org.osmdroid.views.overlay.ScaleBarOverlay;
+import org.osmdroid.views.overlay.compass.CompassOverlay;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,6 +46,16 @@ public class CourseSynthese extends AppCompatActivity {
 
     /** Element graphique: Tracé du parcours */
     private Polyline polyline;
+
+    /** Element graphique: barre d'échelle */
+    private ScaleBarOverlay scaleBarOverlay;
+
+    /** Element graphique: compas */
+    private CompassOverlay compassOverlay;
+
+    /** Element graphique: position actuelle de l'utilisateur */
+    private MyLocationNewOverlay myLocationNewOverlay;
+
     private Button btnRetour;
     private String parcoursId;
 
@@ -52,9 +67,22 @@ public class CourseSynthese extends AppCompatActivity {
 
         map = initMap();
 
+        // Initialisation des éléments graphiques
         polyline = initPolyline();
+
         map.getOverlays().add(polyline);
 
+        scaleBarOverlay = new ScaleBarOverlay(map);
+        compassOverlay = new CompassOverlay(getApplicationContext(), map);
+        compassOverlay.enableCompass();
+        myLocationNewOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getApplicationContext()), map);
+        myLocationNewOverlay.enableMyLocation();
+
+
+        map.getOverlays().add(polyline);
+        map.getOverlays().add(scaleBarOverlay);
+        map.getOverlays().add(compassOverlay);
+        map.getOverlays().add(myLocationNewOverlay);
 
         btnRetour.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +107,7 @@ public class CourseSynthese extends AppCompatActivity {
      * @return la carte initilisée
      */
     private MapView initMap() {
-        MapView map = findViewById(R.id.mapView);
+        MapView map = findViewById(R.id.mapSynthese);
         map.setBuiltInZoomControls(false);
         map.setMultiTouchControls(true);
         map.getController().setZoom(20.0);

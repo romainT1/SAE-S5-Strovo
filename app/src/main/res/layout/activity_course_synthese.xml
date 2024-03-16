@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <org.osmdroid.views.MapView
-        android:id="@+id/mapView"
+        android:id="@+id/mapSynthese"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
