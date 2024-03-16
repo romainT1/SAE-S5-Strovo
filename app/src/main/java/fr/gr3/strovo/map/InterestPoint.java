@@ -30,6 +30,18 @@ public class InterestPoint {
         this.description = description;
     }
 
+    public static InterestPoint fromJson(JSONObject jsonObject) throws JSONException {
+
+        String name = jsonObject.getString("name");
+        String description = jsonObject.getString("description");
+        JSONArray coordinatesArray = jsonObject.getJSONArray("coordinates");
+        double latitude = coordinatesArray.getDouble(0);
+        double longitude = coordinatesArray.getDouble(1);
+        GeoPoint point = new GeoPoint(latitude, longitude);
+
+        return new InterestPoint(point, name, description);
+    }
+
     /**
      * @return les coordonnées du point
      */
