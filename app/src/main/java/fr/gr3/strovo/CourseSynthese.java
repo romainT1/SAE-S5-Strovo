@@ -32,6 +32,7 @@ import java.util.Date;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.model.Route;
+import fr.gr3.strovo.map.InterestPoint;
 
 public class CourseSynthese extends AppCompatActivity {
 
@@ -117,12 +118,14 @@ public class CourseSynthese extends AppCompatActivity {
                             float distance = response.isNull("distance") ? 0 : (float) response.getDouble("distance");
                             double elevation = response.isNull("elevation") ? 0 : response.getDouble("elevation");
 
-                            String[] interestPointsIds = null;
-                            JSONArray interestPointsIdsJson = response.isNull("interestPointsIds") ? null : response.getJSONArray("interestPointsIds");
-                            if (interestPointsIdsJson != null) {
-                                interestPointsIds = new String[interestPointsIdsJson.length()];
-                                for (int i = 0; i < interestPointsIdsJson.length(); i++) {
-                                    interestPointsIds[i] = interestPointsIdsJson.getString(i);
+                            // Conversion des points d'intérêt (si présents)
+                            InterestPoint[] interestPoints = null;
+                            JSONArray interestPointsJson = response.isNull("interestPoints") ? null : response.getJSONArray("interestPoints");
+                            if (interestPointsJson != null) {
+                                interestPoints = new InterestPoint[interestPointsJson.length()];
+                                for (int i = 0; i < interestPointsJson.length(); i++) {
+                                    JSONObject interestPointJson = interestPointsJson.getJSONObject(i);
+                                    interestPoints[i] = InterestPoint.fromJson(interestPointJson);
                                 }
                             }
 
@@ -138,7 +141,7 @@ public class CourseSynthese extends AppCompatActivity {
                             }
 
                             // Créez un nouvel objet Route avec les données extraites
-                            Route route = new Route(name, description, date, time, averageSpeed, distance, elevation, interestPointsIds, coordinates);
+                            Route route = new Route(name, description, date, time, averageSpeed, distance, elevation, interestPoints, coordinates);
 
                             chargerParcours(route);
                         } catch (JSONException e) {
