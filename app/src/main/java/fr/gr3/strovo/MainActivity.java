@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void connexion(String email, String password) throws NoSuchAlgorithmException {
         String apiUrl = String.format(Endpoints.LOGIN_URL, email, PasswordHasher.hashPassword(password));
-        switchToAccueil("");
+        //switchToAccueil("");
         // Crée une requête GET pour s'identifier à l'API
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET, apiUrl, null,

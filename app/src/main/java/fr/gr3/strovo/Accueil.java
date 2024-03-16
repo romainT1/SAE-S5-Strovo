@@ -59,6 +59,9 @@ public class Accueil extends AppCompatActivity {
     /** Clé du token */
     public static final String EXTRA_TOKEN = "token";
 
+    /** Clé le l'id du parcours */
+    public static final String PARCOURS_ID = "PARCOURS_ID";
+
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
 
@@ -101,12 +104,6 @@ public class Accueil extends AppCompatActivity {
 
     /** Pour gérer le délai de l'appel à l'API */
     private Runnable runnable;
-
-    /** Handler pour gérer le délai sur le clic du bouton */
-    private Handler handlerButton;
-
-    /** Définit le status du clic sur le bouton */
-    private boolean longClickDetected;
 
     /** Token de l'utilisateur courant */
     private String userToken;
@@ -169,6 +166,8 @@ public class Accueil extends AppCompatActivity {
                         // Vérifie si la liste des parcours est vide
                         if (parcoursList.isEmpty()) {
                             emptyParcoursText.setVisibility(View.VISIBLE);
+                        } else {
+                            emptyParcoursText.setVisibility(View.INVISIBLE);
                         }
                     }
                 },
@@ -310,44 +309,7 @@ public class Accueil extends AppCompatActivity {
 
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
-
-        // Configuration de l'écouteur du clic sur le bouton pour lancer le parcours
-        startParcoursListener();
     }
-
-    /**
-     * Ecouteurs d'événements du clic sur le bouton de lancement du parcours.
-     */
-    private void startParcoursListener() {
-        lancerParcoursButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        longClickDetected = false;
-                        handler.postDelayed(longClickRunnable, 3000); // Déclencher après 3 secondes
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        handler.removeCallbacks(longClickRunnable);
-                        if (!longClickDetected) {
-                            // Si le clic est court (inférieur à 3 secondes)
-                            Toast.makeText(Accueil.this, R.string.erreurLancementParcours, Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                }
-                return true;
-            }
-        });
-    }
-
-    private Runnable longClickRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Si le bouton est toujours enfoncé après 3 secondes
-            longClickDetected = true;
-            clickSaveParcours(lancerParcoursButton);
-        }
-    };
 
     @Override
     protected void onResume() {
@@ -476,6 +438,21 @@ public class Accueil extends AppCompatActivity {
      * Configure l'écouteur du clic sur un élément de la liste.
      */
     private void itemListListener() {
+        listViewParcours.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Récupérer le parcours sélectionné
+                Parcours parcours = parcoursList.get(position);
+
+                // Créer l'intention pour ouvrir une nouvelle activité ou effectuer une action
+                Intent intent = new Intent(Accueil.this, CourseSynthese.class);
+                // Passer des données à l'activité si nécessaire
+                intent.putExtra(PARCOURS_ID, parcours.getId());
+                // Démarrer l'activité
+                startActivity(intent);
+            }
+        });
+
         listViewParcours.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
