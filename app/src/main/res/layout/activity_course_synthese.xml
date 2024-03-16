@@ -28,14 +28,12 @@
                 android:id="@+id/nameTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="NOM PARCOURS"
                 android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/dateTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="DATE"
                 android:gravity="end"/>
 
         </LinearLayout>
@@ -44,32 +42,27 @@
             android:id="@+id/descriptionTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="DESCRIPTION PARCOURS"
             android:layout_marginBottom="8dp"/>
 
         <TextView
             android:id="@+id/distanceTextView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Distance : 25 km" />
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/speedTextView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vitesse : 13km/h" />
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/elevationTextView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Dénivelé : 56km" />
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/timeTextView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Temps : 2h 51min" />
+            android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/floating_home_button"

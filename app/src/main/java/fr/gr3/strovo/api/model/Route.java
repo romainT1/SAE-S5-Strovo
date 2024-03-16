@@ -6,19 +6,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import fr.gr3.strovo.map.InterestPoint;
 
 public class Route {
-
-    /** Identifiant de l'utilisateur. */
-    private final int userId;
 
     /** Nom du parcours. */
     private String name;
@@ -50,7 +49,6 @@ public class Route {
     /**
      * Construit un parcours.
      *
-     * @param userId identifiant de l'utilisateur
      * @param name nom du parcours
      * @param description description du parcours
      * @param date date du parcours
@@ -61,10 +59,9 @@ public class Route {
      * @param interestPoints liste des points d'intêrets associés au parcours
      * @param coordinates liste de coordonnées de points formant le parcours
      */
-    public Route(int userId, String name, String description, Date date,
+    public Route(String name, String description, Date date,
                  long time, float speed, float distance, double elevation,
                  List<InterestPoint> interestPoints, List<double[]> coordinates) {
-        this.userId = userId;
         this.name = name;
         this.description = description;
         this.date = date;
@@ -79,13 +76,11 @@ public class Route {
     /**
      * Construit un parcours.
      *
-     * @param userId identifiant de l'utilisateur
      * @param name nom du parcours
      * @param description description du parcours
      * @param date date du parcours
      */
-    public Route(int userId, String name, String description, Date date) {
-        this.userId = userId;
+    public Route(String name, String description, Date date) {
         this.name = name;
         this.description = description;
         this.date = date;
@@ -95,10 +90,6 @@ public class Route {
         this.elevation = 0;
         this.interestPoints = new ArrayList<>();
         this.coordinates = new ArrayList<>();
-    }
-
-    public int getUserId() {
-        return userId;
     }
 
     public String getName() {
@@ -117,8 +108,15 @@ public class Route {
         this.description = description;
     }
 
-    public Date getDate() {
-        return date;
+    public String getDate() {
+        // Créer un objet SimpleDateFormat pour le format
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        // Formater la date dans le format souhaité
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        String formattedDate = sdf.format(date);
+
+        return formattedDate;
     }
 
     public long getTime() {
@@ -137,16 +135,16 @@ public class Route {
         this.speed = speed;
     }
 
-    public float getDistance() {
-        return distance;
-    }
-
     public void setDistance(float distance) {
         this.distance = distance;
     }
 
-    public double getElevation() {
-        return elevation;
+    public int getDistance() {
+        return (int) distance;
+    }
+
+    public int getElevation() {
+        return (int) elevation;
     }
 
     public void setElevation(double elevation) {
@@ -176,7 +174,6 @@ public class Route {
      */
     public JSONObject toJson() throws JSONException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("userId", userId);
         jsonObject.put("name", name);
         jsonObject.put("description", description);
         jsonObject.put("date", new SimpleDateFormat("yyyy-MM-dd").format(date));
