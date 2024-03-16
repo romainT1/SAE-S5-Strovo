@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -58,6 +59,13 @@ public class CourseSynthese extends AppCompatActivity {
 
     private Button btnRetour;
     private String parcoursId;
+    private TextView parcoursName;
+    private TextView parcoursDescription;
+    private TextView parcoursDate;
+    private TextView parcoursDistance;
+    private TextView parcoursElevation;
+    private TextView parcoursTime;
+    private TextView parcoursSpeed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,20 +77,24 @@ public class CourseSynthese extends AppCompatActivity {
 
         // Initialisation des éléments graphiques
         polyline = initPolyline();
-
-        map.getOverlays().add(polyline);
-
         scaleBarOverlay = new ScaleBarOverlay(map);
         compassOverlay = new CompassOverlay(getApplicationContext(), map);
         compassOverlay.enableCompass();
         myLocationNewOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getApplicationContext()), map);
         myLocationNewOverlay.enableMyLocation();
 
-
         map.getOverlays().add(polyline);
         map.getOverlays().add(scaleBarOverlay);
         map.getOverlays().add(compassOverlay);
         map.getOverlays().add(myLocationNewOverlay);
+
+        parcoursDate = findViewById(R.id.dateTextView);
+        parcoursName = findViewById(R.id.nameTextView);
+        parcoursDistance = findViewById(R.id.distanceTextView);
+        parcoursDescription = findViewById(R.id.descriptionTextView);
+        parcoursElevation = findViewById(R.id.elevationTextView);
+        parcoursTime = findViewById(R.id.timeTextView);
+        parcoursSpeed = findViewById(R.id.speedTextView);
 
         btnRetour.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,12 +201,22 @@ public class CourseSynthese extends AppCompatActivity {
 
     private void chargerParcours(Route route) {
         List<double[]> coordinates = route.getCoordinates();
+        // Affiche le parcours sur la map
         for (double[] coordinate: coordinates) {
             GeoPoint point = new GeoPoint(coordinate[0], coordinate[1]);
             polyline.addPoint(point);
         }
         map.invalidate();
         map.getController().setCenter(new GeoPoint(coordinates.get(0)[0], coordinates.get(0)[1]));
+
+        // Affiche les informations associés au parcours
+        parcoursName.setText(route.getName());
+        parcoursDescription.setText(route.getDescription());
+        parcoursDate.setText(route.getDate().toString());
+        parcoursDistance.setText(String.valueOf(route.getDistance()));
+        parcoursSpeed.setText(String.valueOf(route.getSpeed()));
+        parcoursTime.setText(String.valueOf(route.getTime()));
+        parcoursElevation.setText(String.valueOf(route.getElevation()));
     }
 
     @Override
