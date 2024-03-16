@@ -1,14 +1,7 @@
 package fr.gr3.strovo.map;
 
 import android.location.Location;
-import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.osmdroid.util.GeoPoint;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +11,7 @@ import fr.gr3.strovo.api.model.Route;
 /**
  * Représente un parcours.
  */
-public class Parcours {
+public class RouteManager {
 
     /** Indique si le parcours est en cours d'enregistrement */
     private boolean running;
@@ -35,7 +28,7 @@ public class Parcours {
     /**
      * Construit un parcours.
      */
-    public Parcours(int userId, String name, String description, Date date) {
+    public RouteManager(int userId, String name, String description, Date date) {
         this.running = false;
         this.route = new Route(userId, name, description, date);
         this.locations = new ArrayList<>();

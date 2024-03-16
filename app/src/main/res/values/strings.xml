@@ -3,8 +3,14 @@
 
     <!-- Accueil  -->
     <string name="filtres">Filtres</string>
+<<<<<<< HEAD
     <string name="enregistrerParcours">Enregistrer un parcours</string>
     <string name="aucunParcours">Aucun parcours trouvé.</string>
+=======
+    <string name="enregistrerParcours">Enregistrer un routeManager</string>
+    <string name="erreurLancementParcours">Pour lancer un routeManager, maintenez le clic sur le bouton pendant plus de 3 secondes.</string>
+    <string name="aucunParcours">Aucun routeManager trouvé.</string>
+>>>>>>> f6eba8b (Renommage RouteManager)
 
     <!-- Connexion / Inscription  -->
     <string name="email">Email</string>
@@ -44,9 +50,14 @@
     <string name="ajouterPointInteret">Ajouter un point d\'interet</string>
     <string name="arreter">Arreter</string>
 
+<<<<<<< HEAD
     <!-- Popup Supprimer parcours-->
     <string name="modifParcours">Supprimer le parcours</string>
     <string name="messageConfirmationSuppression">Etes-vous sûr de vouloir supprimer ce parcours</string>
+=======
+    <!-- Popup modif routeManager-->
+    <string name="modifParcours">Modifier le routeManager</string>
+>>>>>>> f6eba8b (Renommage RouteManager)
 
     <!-- Popup permissions-->
     <string name="titrePopupPermissions">Autorisations nécessaires</string>
