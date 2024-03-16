@@ -16,6 +16,12 @@
 
     <!-- Course Synthèse  -->
     <string name="retourAccueil">Retourner à l\'accueil</string>
+    <string name="distance">Distance : %s m</string>
+    <string name="distanceKm">Distance : %s km %s m</string>
+    <string name="denivele">Dénivelé : %s m</string>
+    <string name="temps">Temps : %s</string>
+    <string name="vitesse">Vitesse : %s km/h</string>
+    <string name="errRecupInfosParcours">Impossible de récupérer les informations associés au parcours</string>
 
     <!-- Map  -->
     <string name="erreurLancementParcours">Erreur lancement parcours</string>
