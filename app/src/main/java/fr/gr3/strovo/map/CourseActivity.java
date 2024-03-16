@@ -10,8 +10,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import fr.gr3.strovo.Accueil;
 import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.Endpoints;
 
@@ -84,6 +87,12 @@ public class CourseActivity extends AppCompatActivity {
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;
 
+    /** Définit le status du clic sur le bouton */
+    private boolean longClickDetected;
+
+    /** Handler pour gérer le délai du bouton stop */
+    private Handler handler = new Handler();
+
     /**
      * Méthode appelée lors de la création de l'activité.
      * Initialise les composants graphiques, configure les écouteurs d'événements
@@ -99,7 +108,8 @@ public class CourseActivity extends AppCompatActivity {
 
         requestQueue = Volley.newRequestQueue(this);
         map = initMap();
-        stopButton = initStopButton();
+
+        stopButton = findViewById(R.id.btnArreter);
         parcours = new Parcours(1,"A changer", "A changer", new Date()); // TODO changer
         locationListener = initLocationListener();
         locationManager = initLocationManager();
@@ -118,6 +128,8 @@ public class CourseActivity extends AppCompatActivity {
         map.getOverlays().add(myLocationNewOverlay);
 
         parcours.start();
+
+        stopParcoursListener();
     }
 
     /**
@@ -133,30 +145,52 @@ public class CourseActivity extends AppCompatActivity {
     }
 
     /**
-     * Initialise le bouton d'arrêt d'enregistrement du parcours
-     * @return la carte initilisée
+     * Ecouteurs d'événements du clic sur le bouton d'arrêt du parcours.
      */
-    private Button initStopButton() {
-        Button button = findViewById(R.id.btnArreter);
-        button.setOnClickListener(v -> {
-            Toast.makeText(getApplicationContext(), "Appuyez longtemps pour arrêter le parcours", Toast.LENGTH_SHORT).show();
+    private void stopParcoursListener() {
+        stopButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        longClickDetected = false;
+                        handler.postDelayed(longClickRunnable, 3000); // Déclencher après 3 secondes
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        handler.removeCallbacks(longClickRunnable);
+                        if (!longClickDetected) {
+                            // Si le clic est court (inférieur à 3 secondes)
+                            Toast.makeText(CourseActivity.this, R.string.erreurArretParcours, Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                }
+                return true;
+            }
         });
-        button.setOnLongClickListener(v -> {
-            // TODO cliquer 3sec
-            //TODO désactiver tout ce qui est désactivable ??
-/*
-            locationManager.removeUpdates(ecouteurGPS); // TODO utile ?????
-            ecouteurGPS = null;*/
-
-            // TODO Sauvegarder parcours
-            parcours.stop();
-            addParcoursToApi(parcours);
-            finish(); // Termine l'activité
-            return true;
-        });
-        return button;
     }
 
+    /**
+     * Exécutable permettant d'arrêter le parcours.
+     */
+    private Runnable longClickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Si le bouton est toujours enfoncé après 3 secondes
+            longClickDetected = true;
+            clicStopParcours(stopButton);
+        }
+    };
+
+
+    /**
+     * Méthode exécutée lorsque l'utilisateur clique sur le bouton d'arrêt du parcours.
+     */
+    public void clicStopParcours(View view) {
+        // TODO Sauvegarder parcours
+        parcours.stop();
+        addParcoursToApi(parcours);
+        finish(); // Termine l'activité
+    }
 
     /** Initialise l'écouteur de localisation de l'utilisateur.
      * @return la l'écouteur initilisé

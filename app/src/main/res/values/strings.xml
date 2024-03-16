@@ -4,7 +4,6 @@
     <!-- Accueil  -->
     <string name="filtres">Filtres</string>
     <string name="enregistrerParcours">Enregistrer un parcours</string>
-    <string name="erreurLancementParcours">Pour lancer un parcours, maintenez le clic sur le bouton pendant plus de 3 secondes.</string>
     <string name="aucunParcours">Aucun parcours trouvé.</string>
 
     <!-- Connexion / Inscription  -->
@@ -18,6 +17,8 @@
     <!-- Course Synthèse  -->
     <string name="retourAccueil">Retourner à l\'accueil</string>
 
+    <!-- Map  -->
+    <string name="erreurArretParcours">Pour arrêter un parcours, maintenez le clic sur le bouton pendant plus de 3 secondes.</string>
 
     <!-- Menus Modification -->
     <string name="modifier">Modifier description</string>
@@ -43,8 +44,9 @@
     <string name="ajouterPointInteret">Ajouter un point d\'interet</string>
     <string name="arreter">Arreter</string>
 
-    <!-- Popup modif parcours-->
-    <string name="modifParcours">Modifier le parcours</string>
+    <!-- Popup Supprimer parcours-->
+    <string name="modifParcours">Supprimer le parcours</string>
+    <string name="messageConfirmationSuppression">Etes-vous sûr de vouloir supprimer ce parcours</string>
 
     <!-- Popup permissions-->
     <string name="titrePopupPermissions">Autorisations nécessaires</string>
