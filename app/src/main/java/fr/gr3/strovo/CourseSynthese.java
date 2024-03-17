@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
 
 import org.osmdroid.views.overlay.ScaleBarOverlay;
@@ -170,6 +171,28 @@ public class CourseSynthese extends AppCompatActivity {
     }
 
     /**
+     * Ajoute un point d'intérêt au parcours et l'affiche sur la carte.
+     * @param interestPoint point d'intérêt
+     */
+    private void addInterestPoint(InterestPoint interestPoint) {
+
+        // Affiche le point d'intérêt sur la carte
+        Marker marker = new Marker(map);
+        marker.setPosition(interestPoint.getPoint());
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        marker.setTitle(interestPoint.getName());// TODO voir si on affiche le titre ou la description
+        marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker, MapView mapView) {
+                Toast.makeText(getApplicationContext(), interestPoint.getName() + ": " + interestPoint.getDescription(), Toast.LENGTH_SHORT).show();
+                // showInterestPointPopup(interestpoint) un truc comme ça
+                return true;
+            }
+        });
+        map.getOverlays().add(marker);
+    }
+
+    /**
      * Initialise les vues de l'activité et configure les écouteurs d'événements.
      */
     private void initializeViews() {
@@ -302,6 +325,11 @@ public class CourseSynthese extends AppCompatActivity {
         }
         map.invalidate();
         map.getController().setCenter(new GeoPoint(coordinates.get(0)[0], coordinates.get(0)[1]));
+
+        // Affiche les points d'intérêts
+        for (InterestPoint interestPoint : parcours.getInterestPoints()) {
+            addInterestPoint(interestPoint);
+        }
 
         // Affiche les informations associés au parcours
         parcoursName.setText(parcours.getName());

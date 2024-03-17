@@ -343,8 +343,7 @@ public class CourseActivity extends AppCompatActivity {
         marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
-                // TODO ouvrir la popup de information/modification du point ?????
-                Toast.makeText(getApplicationContext(), "Ceci est un point d'interet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), interestPoint.getName() + ": " + interestPoint.getDescription(), Toast.LENGTH_SHORT).show();
                 // showInterestPointPopup(interestpoint) un truc comme ça
                 return true;
             }

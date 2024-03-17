@@ -561,8 +561,6 @@ public class Accueil extends AppCompatActivity {
         } else {
             showSaveParcoursPopup();
         }
-
-
     }
 
 
