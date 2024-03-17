@@ -3,14 +3,16 @@ package fr.gr3.strovo;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -34,11 +36,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import fr.gr3.strovo.api.Endpoints;
-import fr.gr3.strovo.api.model.Route;
+import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.map.InterestPoint;
+import fr.gr3.strovo.utils.Keys;
 
 /**
  * Activité pour afficher un résumé d'un parcours.
@@ -119,6 +124,9 @@ public class CourseSynthese extends AppCompatActivity {
      */
     private RequestQueue requestQueue;
 
+    /** Token de connexion de l'utilisateur */
+    private String token;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,6 +134,10 @@ public class CourseSynthese extends AppCompatActivity {
         btnRetour = findViewById(R.id.floating_home_button);
 
         map = initMap();
+
+        Intent intent = getIntent();
+        token = intent.getStringExtra(Keys.TOKEN_KEY);
+        parcoursId = intent.getStringExtra(Keys.PARCOURS_ID_KEY);
 
         // Initialisation des éléments graphiques
         polyline = initPolyline();
@@ -149,17 +161,7 @@ public class CourseSynthese extends AppCompatActivity {
             }
         });
 
-        // Récupère l'intention qui a démarré cette activité
-        Intent intent = getIntent();
-
-        // Vérifie si l'intention contient l'identifiant du parcours
-        if (intent != null && intent.hasExtra(PARCOURS_ID)) {
-            parcoursId = intent.getStringExtra(PARCOURS_ID);
-            findParcoursFromApi(parcoursId);
-        } else {
-            Toast.makeText(this, R.string.errRecupInfosParcours, Toast.LENGTH_LONG).show();
-            finish();
-        }
+        findParcoursFromApi(parcoursId);
     }
 
     /**
@@ -218,22 +220,18 @@ public class CourseSynthese extends AppCompatActivity {
 
         // Créer une nouvelle demande GET à l'aide de Volley
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, apiUrl, null, new Response.Listener<JSONObject>() {
+                (Request.Method.GET, apiUrl, null, response -> {
 
-                    @Override
-                    public void onResponse(JSONObject response) {
+                    try {
+                        // Créé un nouvel objet Parcours avec les données extraites
+                        Parcours parcours = fetchParcours(response);
 
-                        try {
-                            // Créé un nouvel objet Route avec les données extraites
-                            Route route = fetchParcours(response);
-
-                            // Charge les éléments graphiques de la synthèse
-                            chargerParcours(route);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (ParseException e) {
-                            throw new RuntimeException(e);
-                        }
+                        // Charge les éléments graphiques de la synthèse
+                        chargerParcours(parcours);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
                     }
                 }, new Response.ErrorListener() {
 
@@ -241,7 +239,15 @@ public class CourseSynthese extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(CourseSynthese.this, R.string.errRecupInfosParcours, Toast.LENGTH_LONG).show();
                     }
-                });
+                })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", token);
+                return headers;
+            }
+        };
 
         // Ajouter la demande à la file d'attente de Volley pour l'exécuter
         requestQueue.add(jsonObjectRequest);
@@ -252,7 +258,7 @@ public class CourseSynthese extends AppCompatActivity {
      * @param response les données du parcours retourné par l'API
      * @return l'objet parcours.
      */
-    private Route fetchParcours(JSONObject response) throws JSONException, ParseException {
+    private Parcours fetchParcours(JSONObject response) throws JSONException, ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         // Récupère les différentes propriétés de l'objet JSON
         String name = response.isNull("name") ? null : response.getString("name");
@@ -282,15 +288,15 @@ public class CourseSynthese extends AppCompatActivity {
             }
         }
 
-        return new Route(name, description, date, time, averageSpeed, distance, elevation, interestPoints, coordinates);
+        return new Parcours(name, description, date, time, averageSpeed, distance, elevation, interestPoints, coordinates);
     }
 
     /**
      * Affiche les informations associées au parcours sur l'interface graphique.
-     * @param route le parcours à afficher
+     * @param parcours le parcours à afficher
      */
-    private void chargerParcours(Route route) {
-        List<double[]> coordinates = route.getCoordinates();
+    private void chargerParcours(Parcours parcours) {
+        List<double[]> coordinates = parcours.getCoordinates();
         // Affiche le parcours sur la map
         for (double[] coordinate: coordinates) {
             GeoPoint point = new GeoPoint(coordinate[0], coordinate[1]);
@@ -300,10 +306,10 @@ public class CourseSynthese extends AppCompatActivity {
         map.getController().setCenter(new GeoPoint(coordinates.get(0)[0], coordinates.get(0)[1]));
 
         // Affiche les informations associés au parcours
-        parcoursName.setText(route.getName());
-        parcoursDescription.setText(route.getDescription());
-        parcoursDate.setText(route.getDate());
-        int distance = route.getDistance();
+        parcoursName.setText(parcours.getName());
+        parcoursDescription.setText(parcours.getDescription());
+        parcoursDate.setText(parcours.getDate());
+        int distance = parcours.getDistance();
         String resDistance;
         if (distance > 1000) {
             // Convertie la distance en kilomètres
@@ -314,11 +320,11 @@ public class CourseSynthese extends AppCompatActivity {
             resDistance = String.format(getString(R.string.distance), String.valueOf(distance));
         }
 
-        String time = formatTime(route.getTime());
+        String time = formatTime(parcours.getTime());
         parcoursDistance.setText(resDistance);
-        parcoursSpeed.setText(String.format(getString(R.string.vitesse), String.valueOf(route.getSpeed())));
+        parcoursSpeed.setText(String.format(getString(R.string.vitesse), String.valueOf(parcours.getSpeed())));
         parcoursTime.setText(String.format(getString(R.string.temps), time));
-        parcoursElevation.setText(String.format(getString(R.string.denivele), String.valueOf(route.getElevation())));
+        parcoursElevation.setText(String.format(getString(R.string.denivele), String.valueOf(parcours.getElevation())));
     }
 
     /**

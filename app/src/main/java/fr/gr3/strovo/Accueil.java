@@ -1,6 +1,9 @@
 package fr.gr3.strovo;
 
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.SearchView;
 
 
@@ -55,6 +58,7 @@ import java.util.Map;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.map.CourseActivity;
+import fr.gr3.strovo.utils.Keys;
 
 
 /**
@@ -63,11 +67,6 @@ import fr.gr3.strovo.map.CourseActivity;
  * et interagir avec les parcours affichés.
  */
 public class Accueil extends AppCompatActivity {
-
-
-    /** Clé du token */
-    public static final String EXTRA_TOKEN = "token";
-
 
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
@@ -93,18 +92,12 @@ public class Accueil extends AppCompatActivity {
     private TextView emptyParcoursText;
 
 
-
-
     /** Liste des parcours de l'utilisateur */
     private List<Parcours> parcoursList;
 
 
     /** Adaptateur pour la liste des parcours */
     private ParcoursAdapter adapter;
-
-
-    /** Identifiant de l'utilisateur */
-    private int userId;
 
 
     /** Nom du parcours */
@@ -134,9 +127,8 @@ public class Accueil extends AppCompatActivity {
     /** Définit le status du clic sur le bouton */
     private boolean longClickDetected;
 
-
-    /** Token de l'utilisateur courant */
-    private String userToken;
+    /** Token de connexion de l'utilisateur */
+    private String token;
 
 
     /**
@@ -150,26 +142,8 @@ public class Accueil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
-
-        if (!TokenManager.getInstance(this).isLoggedIn()) {
-            Intent intent = new Intent(Accueil.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-            return;
-        }
-        // TODO : Récupérer l'id du User dans les préférences
-        userId = 1;
-
-
-        // Récupère l'intention qui a démarré cette activité
-        Intent intent = getIntent();
-
-
-        // Vérifie si l'intention contient le token
-        if (intent != null && intent.hasExtra(EXTRA_TOKEN)) {
-            userToken = intent.getStringExtra(EXTRA_TOKEN);
-        }
-
+        // Récupère le token
+        token = getIntent().getStringExtra(Keys.TOKEN_KEY);
 
         initializeViews();
         setupEventListeners();
@@ -178,13 +152,12 @@ public class Accueil extends AppCompatActivity {
 
     /**
      * Récupère les données des parcours depuis l'API en utilisant la bibliothèque Volley.
-     * @param userId Identifiant de l'utilisateur
      * @param nameParcours Nom du parcours à rechercher
      * @param dateIntervalle Intervalle de date dont on veut les parcours
      */
-    private void fetchParcoursFromApi(int userId, String nameParcours, Date[] dateIntervalle) {
+    private void fetchParcoursFromApi(String nameParcours, Date[] dateIntervalle) {
         //parcoursList.clear();
-        String apiUrl = String.format(Endpoints.GET_PARCOURS, userId);
+        String apiUrl = Endpoints.GET_PARCOURS;
 
 
         if (nameParcours != null && !nameParcours.equals("")) {
@@ -219,9 +192,6 @@ public class Accueil extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
-                            TokenManager.getInstance(Accueil.this).logout();
-                            Intent intent = new Intent(Accueil.this, MainActivity.class);
-                            startActivity(intent);
                             finish();
                         } else {
                             emptyParcoursText.setVisibility(View.VISIBLE);
@@ -232,11 +202,10 @@ public class Accueil extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + userToken);
+                headers.put("Authorization", token);
                 return headers;
             }
         };
-
 
         // Ajoute la requête à la file d'attente
         requestQueue.add(jsonArrayRequest);
@@ -260,75 +229,13 @@ public class Accueil extends AppCompatActivity {
                         parcoursJson.getString("id"
                         ));
 
-
                 adapter.add(parcours);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
-
         adapter.notifyDataSetChanged();
-    }
-
-
-    /**
-     * Envoie une requête POST à l'API pour ajouter un nouveau parcours.
-     * @param parcours Le parcours à ajouter.
-     */
-    public void addParcoursFromApi(Parcours parcours) {
-        // Crée un objet JSON contenant les détails du parcours
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("name", parcours.getNom());
-            jsonObject.put("description", parcours.getDescription());
-            jsonObject.put("date", new Date().getTime()); // Date actuelle
-            jsonObject.put("userId", userId); // Identifiant de l'utilisateur
-            jsonObject.put("elevation", new JSONArray()); // Tableau JSON vide pour l'élévation
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        // Crée une requête JSON pour envoyer les détails du parcours à l'API
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                       /*try {
-                           // On récupère l'objet Parcours de la réponse
-                           JSONObject parcoursObject = response.getJSONObject("parcours");
-
-
-                           String parcoursName = parcoursObject.getString("name");
-                           String parcoursDescription = parcoursObject.getString("description");
-                           String parcoursDate = parcoursObject.getString("date");
-                           Parcours parcours = new Parcours(parcoursName, parcoursDate, parcoursDescription);
-                           adapter.add(parcours);
-                       } catch (JSONException e) {
-                           e.printStackTrace();
-                       }*/
-
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // En cas d'erreur de l'API, cette méthode est appelée
-            }
-        })
-        {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + userToken);
-                return headers;
-            }
-        };
-
-
-        // Ajoute la requête à la file d'attente des requêtes HTTP
-        requestQueue.add(request);
     }
 
 
@@ -367,11 +274,10 @@ public class Accueil extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + userToken);
+                headers.put("Authorization", token);
                 return headers;
             }
         };
-
 
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
         requestQueue.add(deleteRequest);
@@ -436,38 +342,7 @@ public class Accueil extends AppCompatActivity {
 
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
-
-
-        // Configuration de l'écouteur du clic sur le bouton pour lancer le parcours
-        startParcoursListener();
     }
-
-
-    /**
-     * Ecouteurs d'événements du clic sur le bouton de lancement du parcours.
-     */
-    private void startParcoursListener() {
-        lancerParcoursButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        longClickDetected = false;
-                        handler.postDelayed(longClickRunnable, 3000); // Déclencher après 3 secondes
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        handler.removeCallbacks(longClickRunnable);
-                        if (!longClickDetected) {
-                            // Si le clic est court (inférieur à 3 secondes)
-                            Toast.makeText(Accueil.this, R.string.erreurLancementParcours, Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                }
-                return true;
-            }
-        });
-    }
-
 
     private Runnable longClickRunnable = new Runnable() {
         @Override
@@ -485,7 +360,7 @@ public class Accueil extends AppCompatActivity {
 
 
         // Appelle la méthode pour récupérer les données de l'API
-        fetchParcoursFromApi(userId, null, null);
+        fetchParcoursFromApi(null, null);
     }
 
 
@@ -522,7 +397,7 @@ public class Accueil extends AppCompatActivity {
                     @Override
                     public void run() {
                         String rechercheNomParcours = newText.replace(" ", "+");
-                        fetchParcoursFromApi(userId, rechercheNomParcours, dateIntervalle);
+                        fetchParcoursFromApi(rechercheNomParcours, dateIntervalle);
                     }
                 };
 
@@ -597,11 +472,10 @@ public class Accueil extends AppCompatActivity {
 
                     parcoursList.clear();
                     adapter.notifyDataSetChanged();
-                    fetchParcoursFromApi(userId, nameParcours, dateFilter);
+                    fetchParcoursFromApi(nameParcours, dateFilter);
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-
 
                 dialog.dismiss();
             }
@@ -626,53 +500,43 @@ public class Accueil extends AppCompatActivity {
      * Configure l'écouteur du clic sur un élément de la liste.
      */
     private void itemListListener() {
-        listViewParcours.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                /* Lorsque l'utilisateur maintient un élément de la liste enfoncé, ouvre une boîte
-                 * de dialogue pour supprimer le parcours
+        listViewParcours.setOnItemLongClickListener((parent, view, position, id) -> {
+            /* Lorsque l'utilisateur maintient un élément de la liste enfoncé, ouvre une boîte
+             * de dialogue pour supprimer le parcours
+             */
+            final Dialog dialog = new Dialog(Accueil.this);
+            Parcours parcours = parcoursList.get(position);
+            // Définis le contenu de la fenêtre contextuelle
+            dialog.setContentView(R.layout.popup_modif_parcours);
+
+
+            // Récupère les éléments de la fenêtre contextuelle
+            Button supprimer = dialog.findViewById(R.id.btnSupprimer);
+            Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+
+            // Gestion du clic sur le bouton "Supprimer"
+            supprimer.setOnClickListener(v -> {
+                /* Lorsque l'utilisateur clique sur "Supprimer",
+                 * supprime le parcours de l'API et de la liste
                  */
-                final Dialog dialog = new Dialog(Accueil.this);
-                Parcours parcours = parcoursList.get(position);
-                // Définis le contenu de la fenêtre contextuelle
-                dialog.setContentView(R.layout.popup_modif_parcours);
+                deleteParcoursFromApi(parcours);
+                dialog.dismiss();
+            });
+
+            // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
+            annuler.setOnClickListener(v -> dialog.dismiss());
+
+            // Affiche la fenêtre contextuelle
+            dialog.show();
+            return true;
+        });
 
 
-                // Récupère les éléments de la fenêtre contextuelle
-                Button supprimer = dialog.findViewById(R.id.btnSupprimer);
-                Button annuler = dialog.findViewById(R.id.btnAnnuler);
-
-
-                // Gestion du clic sur le bouton "Supprimer"
-                supprimer.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        /* Lorsque l'utilisateur clique sur "Supprimer",
-                         * supprime le parcours de l'API et de la liste
-                         */
-                        deleteParcoursFromApi(parcours);
-
-
-                        dialog.dismiss();
-                    }
-                });
-
-
-                // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
-                annuler.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-
-                // Affiche la fenêtre contextuelle
-                dialog.show();
-
-
-                return true;
-            }
+        listViewParcours.setOnItemClickListener((parent, view, position, id) -> {
+            /* Lorsque l'utilisateur clique sur un élément de la liste */
+            Parcours parcours = parcoursList.get(position);
+            switchToSynthese(token, parcours.getId());
         });
     }
 
@@ -700,24 +564,18 @@ public class Accueil extends AppCompatActivity {
         // Créé une instance de Dialog
         final Dialog dialog = new Dialog(Accueil.this);
 
-
         // Définis le contenu de la fenêtre contextuelle
         dialog.setContentView(R.layout.popup_permission);
 
-
         Button closeButton = dialog.findViewById(R.id.fermer);
-
 
         // Gère le clic sur le bouton "Fermer"
         closeButton.setOnClickListener(view -> {
             dialog.dismiss();
         });
 
-
         dialog.show();
     }
-
-
 
 
     /**
@@ -743,12 +601,7 @@ public class Accueil extends AppCompatActivity {
 
         // Gère le clic sur le bouton "Confirmer"
         confirmer.setOnClickListener(view -> {
-            Parcours parcours = new Parcours(inputName.getText().toString(), new Date().toString(), inputCommentaire.getText().toString());
-            addParcoursFromApi(parcours);
-
-
-            Intent intent = new Intent(Accueil.this, CourseActivity.class);
-            startActivity(intent);
+            switchToCourse(token, inputName.getText().toString(), inputCommentaire.getText().toString());
             dialog.dismiss();
         });
 
@@ -758,6 +611,41 @@ public class Accueil extends AppCompatActivity {
 
 
         dialog.show();
+    }
+
+    /**
+     * Appelé quand l'activité course renvoie le parcours effectué au format json
+     */
+    private void parcoursDone() {
+
+    }
+
+    /**
+     * Lance l'intention course.
+     * @param token valeur du token à transmettre à l'activité
+     */
+    private void switchToCourse(String token, String name, String description) {
+        // création d'une intention pour demander lancement de l'activité accueil
+        Intent intention = new Intent(Accueil.this, CourseActivity.class);
+        intention.putExtra(Keys.TOKEN_KEY, token);
+        intention.putExtra(Keys.PARCOURS_NAME_KEY, name);
+        intention.putExtra(Keys.PARCOURS_DESCRIPTION_KEY, description);
+        // lancement de l'activité accueil via l'intention préalablement créée
+        startActivity(intention);
+    }
+
+    /**
+     * Lance l'intention synthèse.
+     * @param parcoursId id du parcours
+     * @param token valeur du token à transmettre à l'activité
+     */
+    private void switchToSynthese(String token, String parcoursId) {
+        // création d'une intention pour demander lancement de l'activité accueil
+        Intent intention = new Intent(Accueil.this, CourseSynthese.class);
+        intention.putExtra(Keys.TOKEN_KEY, token);
+        intention.putExtra(Keys.PARCOURS_ID_KEY, parcoursId);
+        // lancement de l'activité accueil via l'intention préalablement créée
+        startActivity(intention);
     }
 }
 

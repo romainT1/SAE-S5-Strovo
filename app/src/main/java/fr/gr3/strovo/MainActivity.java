@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         // Charge le token depuis les préférences
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         String token = preferences.getString(Keys.TOKEN_KEY, null);
+        // Si un token existe on redirige vers accueil
         if (token != null) {
             switchToAccueil(token);
         }
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         String token = response.getString("value");
                         // Enregistre le token dans les préférences
-                        preferences.edit().putString(Keys.TOKEN_KEY, token);
+                        preferences.edit().putString(Keys.TOKEN_KEY, token).apply();
                         switchToAccueil(token);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
