@@ -1,6 +1,7 @@
 package fr.gr3.strovo;
 
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -8,6 +9,7 @@ import androidx.appcompat.widget.SearchView;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -123,6 +125,9 @@ public class Accueil extends AppCompatActivity {
     /** Handler pour gérer le délai sur le clic du bouton */
     private Handler handlerButton;
 
+    /** Lanceur de l'activité course */
+    private ActivityResultLauncher<Intent> courseActivityLauncher;
+
 
     /** Définit le status du clic sur le bouton */
     private boolean longClickDetected;
@@ -147,6 +152,10 @@ public class Accueil extends AppCompatActivity {
 
         initializeViews();
         setupEventListeners();
+
+        courseActivityLauncher= registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::couseActivityDone);
     }
 
 
@@ -621,6 +630,17 @@ public class Accueil extends AppCompatActivity {
     }
 
     /**
+     * Exécuté au retour de l'activité course
+     */
+    private void couseActivityDone(ActivityResult result) {
+        Intent intent = result.getData();
+
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            switchToSynthese(token, intent.getStringExtra(Keys.PARCOURS_ID_KEY));
+        }
+    }
+
+    /**
      * Lance l'intention course.
      * @param token valeur du token à transmettre à l'activité
      */
@@ -631,13 +651,13 @@ public class Accueil extends AppCompatActivity {
         intention.putExtra(Keys.PARCOURS_NAME_KEY, name);
         intention.putExtra(Keys.PARCOURS_DESCRIPTION_KEY, description);
         // lancement de l'activité accueil via l'intention préalablement créée
-        startActivity(intention);
+        courseActivityLauncher.launch(intention);
     }
 
     /**
      * Lance l'intention synthèse.
-     * @param parcoursId id du parcours
      * @param token valeur du token à transmettre à l'activité
+     * @param parcoursId id du parcours
      */
     private void switchToSynthese(String token, String parcoursId) {
         // création d'une intention pour demander lancement de l'activité accueil

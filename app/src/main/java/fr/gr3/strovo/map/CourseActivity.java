@@ -1,6 +1,7 @@
 package fr.gr3.strovo.map;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -413,7 +414,7 @@ public class CourseActivity extends AppCompatActivity {
                     try {
                         // On récupère l'objet Parcours de la réponse
                         String parcoursId = response.getString("id");
-                        switchToSynthese(token, parcoursId);
+                        switchToAccueil(parcoursId);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -435,25 +436,14 @@ public class CourseActivity extends AppCompatActivity {
     }
 
     /**
-     * Quand l'activité synthèse se ferme, l'activité course se ferme pour rediriger l'utilisateur
-     * vers l'accueil.
+     * Renvoie l'id du parcours créé à l'accueil
+     * @param parcoursId id du parcours
      */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        finish();
-    }
-
-    /**
-     * Lance l'intention synthèse.
-     * @param token valeur du token à transmettre à l'activité
-     */
-    private void switchToSynthese(String token, String parcoursId) {
+    private void switchToAccueil(String parcoursId) {
         // création d'une intention pour demander lancement de l'activité accueil
-        Intent intention = new Intent(CourseActivity.this, CourseSynthese.class);
-        intention.putExtra(Keys.TOKEN_KEY, token);
+        Intent intention = new Intent();
         intention.putExtra(Keys.PARCOURS_ID_KEY, parcoursId);
-        // lancement de l'activité accueil via l'intention préalablement créée
-        startActivity(intention);
+        setResult(Activity.RESULT_OK, intention);
+        finish();
     }
 }
