@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import fr.gr3.strovo.api.model.Route;
+import fr.gr3.strovo.api.model.Parcours;
 
 /**
  * Représente un parcours.
  */
-public class RouteManager {
+public class ParcoursManager {
 
     /** Indique si le parcours est en cours d'enregistrement */
     private boolean running;
@@ -20,7 +20,7 @@ public class RouteManager {
     private boolean paused;
 
     /** Parcours de l'utilisateur */
-   private Route route;
+   private Parcours parcours;
 
     /** Liste de toutes les positions enregistrées pour le parcours */
     private List<Location> locations;
@@ -28,9 +28,9 @@ public class RouteManager {
     /**
      * Construit un parcours.
      */
-    public RouteManager(int userId, String name, String description, Date date) {
+    public ParcoursManager(String name, String description, Date date) {
         this.running = false;
-        this.route = new Route(userId, name, description, date);
+        this.parcours = new Parcours(name, description, date);
         this.locations = new ArrayList<>();
     }
 
@@ -52,7 +52,7 @@ public class RouteManager {
         // Si c'est la première position du parcours ou si l'utilisateur s'est déplacé d'au moins 2 mètres
         if (locations.size() == 0 || location.distanceTo(locations.get(locations.size() - 1)) >= 2) {
             locations.add(location);
-            route.getCoordinates().add(new double[] {location.getLatitude(), location.getLongitude()});
+            parcours.getCoordinates().add(new double[] {location.getLatitude(), location.getLongitude()});
         }
     }
 
@@ -61,7 +61,7 @@ public class RouteManager {
      * @param interestPoint point d'intérêt
      */
     public void addInterestPoint(InterestPoint interestPoint) {
-        route.getInterestPoints().add(interestPoint);
+        parcours.getInterestPoints().add(interestPoint);
     }
 
     public void start() {
@@ -85,10 +85,10 @@ public class RouteManager {
             float distance = calculateDistance();
             double elevation = calculateElevation();
 
-            route.setTime(time);
-            route.setDistance(distance);
-            route.setSpeed(distance / time);
-            route.setElevation(elevation);
+            parcours.setTime(time);
+            parcours.setDistance(distance);
+            parcours.setSpeed(distance / time);
+            parcours.setElevation(elevation);
         }
     }
 
@@ -117,8 +117,8 @@ public class RouteManager {
         return lastLocation.getAltitude() - firstLocation.getAltitude();
     }
 
-    public Route getRoute() {
-        return route;
+    public Parcours getParcours() {
+        return parcours;
     }
 
     /**

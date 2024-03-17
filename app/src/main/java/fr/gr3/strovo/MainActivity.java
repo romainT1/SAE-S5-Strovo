@@ -2,7 +2,9 @@ package fr.gr3.strovo;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -25,7 +27,7 @@ import java.security.NoSuchAlgorithmException;
 
 
 import fr.gr3.strovo.api.Endpoints;
-import fr.gr3.strovo.utils.SharedPrefManager;
+import fr.gr3.strovo.utils.Keys;
 
 
 /**
@@ -33,10 +35,8 @@ import fr.gr3.strovo.utils.SharedPrefManager;
  */
 public class MainActivity extends AppCompatActivity {
 
-
-    /** Clé pour le token transmis par l'activité accueil */
-    public static final String EXTRA_TOKEN = "token";
-
+    /** gestionnaire de préférences */
+    private SharedPreferences preferences;
 
     /** Champ de saisie de l'adresse mail*/
     private EditText email;
@@ -59,10 +59,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connexion);
 
+        // Charge le token depuis les préférences
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String token = preferences.getString(Keys.TOKEN_KEY, null);
+        // Si un token existe on redirige vers accueil
+        if (token != null) {
+            switchToAccueil(token);
+        }
 
         email = findViewById(R.id.email);
         motDePasse = findViewById(R.id.mot_de_passe);
-
 
         requestQueue = Volley.newRequestQueue(this);
     }
@@ -91,8 +97,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     /**
      * Envoie une requête de connexion à l'API et enregistre le token reçu
      * dans les préférences.
@@ -102,13 +106,13 @@ public class MainActivity extends AppCompatActivity {
     private void connexion(String email, String password) throws NoSuchAlgorithmException {
         String apiUrl = String.format(Endpoints.LOGIN_URL, email, PasswordHasher.hashPassword(password));
 
-
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET, apiUrl, null,
                 response -> {
                     try {
                         String token = response.getString("value");
-                        SharedPrefManager.getInstance(this).saveToken(token);
+                        // Enregistre le token dans les préférences
+                        preferences.edit().putString(Keys.TOKEN_KEY, token).apply();
                         switchToAccueil(token);
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -116,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 },
                 error -> {
                     int messageErreur = R.string.err;
-
 
                     /* Si erreur liée à un problème de permission */
                     if (error.networkResponse != null ) {
@@ -139,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     private void switchToAccueil(String token) {
         // création d'une intention pour demander lancement de l'activité accueil
         Intent intention = new Intent(MainActivity.this, Accueil.class);
-        intention.putExtra(EXTRA_TOKEN, token);
+        intention.putExtra(Keys.TOKEN_KEY, token);
         // lancement de l'activité accueil via l'intention préalablement créée
         startActivity(intention);
     }

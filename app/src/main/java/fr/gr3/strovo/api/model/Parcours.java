@@ -1,23 +1,18 @@
 package fr.gr3.strovo.api.model;
 
-import android.location.Location;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import fr.gr3.strovo.map.InterestPoint;
 
-public class Route {
+public class Parcours {
 
     /** Nom du parcours. */
     private String name;
@@ -59,9 +54,9 @@ public class Route {
      * @param interestPoints liste des points d'intêrets associés au parcours
      * @param coordinates liste de coordonnées de points formant le parcours
      */
-    public Route(String name, String description, Date date,
-                 long time, float speed, float distance, double elevation,
-                 List<InterestPoint> interestPoints, List<double[]> coordinates) {
+    public Parcours(String name, String description, Date date,
+                    long time, float speed, float distance, double elevation,
+                    List<InterestPoint> interestPoints, List<double[]> coordinates) {
         this.name = name;
         this.description = description;
         this.date = date;
@@ -80,7 +75,7 @@ public class Route {
      * @param description description du parcours
      * @param date date du parcours
      */
-    public Route(String name, String description, Date date) {
+    public Parcours(String name, String description, Date date) {
         this.name = name;
         this.description = description;
         this.date = date;

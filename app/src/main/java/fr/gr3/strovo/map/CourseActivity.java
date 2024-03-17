@@ -1,8 +1,10 @@
 package fr.gr3.strovo.map;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -45,9 +47,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import fr.gr3.strovo.Accueil;
+import fr.gr3.strovo.CourseSynthese;
 import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.model.Parcours;
+import fr.gr3.strovo.utils.Keys;
 
 public class CourseActivity extends AppCompatActivity {
 
@@ -61,7 +65,7 @@ public class CourseActivity extends AppCompatActivity {
     private Button stopButton;
 
     /** Gestionnaire du parcours de l'utilisateur. */
-    private RouteManager routeManager;
+    private ParcoursManager parcoursManager;
 
     /** Ecouteur de localisation de l'utilisateur. */
     private LocationListener locationListener;
@@ -93,6 +97,9 @@ public class CourseActivity extends AppCompatActivity {
     /** Handler pour gérer le délai du bouton stop */
     private Handler handler = new Handler();
 
+    /** Token de connexion de l'utilisateur */
+    private String token;
+
     /**
      * Méthode appelée lors de la création de l'activité.
      * Initialise les composants graphiques, configure les écouteurs d'événements
@@ -106,12 +113,18 @@ public class CourseActivity extends AppCompatActivity {
 
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
+        // Récupère les valeurs de l'intention
+        Intent intent = getIntent();
+        token = intent.getStringExtra(Keys.TOKEN_KEY);
+        String parcoursName = intent.getStringExtra(Keys.PARCOURS_NAME_KEY);
+        String parcoursDescription = intent.getStringExtra(Keys.PARCOURS_DESCRIPTION_KEY);
+
         requestQueue = Volley.newRequestQueue(this);
         map = initMap();
 
         stopButton = findViewById(R.id.btnArreter);
 
-        routeManager = new RouteManager(1,"A changer", "A changer", new Date()); // TODO changer
+        parcoursManager = new ParcoursManager(parcoursName, parcoursDescription, new Date());
         locationListener = initLocationListener();
         locationManager = initLocationManager();
 
@@ -128,7 +141,7 @@ public class CourseActivity extends AppCompatActivity {
         map.getOverlays().add(compassOverlay);
         map.getOverlays().add(myLocationNewOverlay);
 
-        routeManager.start();
+        parcoursManager.start();
 
         stopParcoursListener();
     }
@@ -188,9 +201,11 @@ public class CourseActivity extends AppCompatActivity {
      */
     public void clicStopParcours(View view) {
         // TODO Sauvegarder parcours
-        routeManager.stop();
-        addParcoursToApi(routeManager);
-        finish(); // Termine l'activité
+        parcoursManager.stop();
+        Parcours parcours = parcoursManager.getParcours();
+        addParcoursToApi();
+        // TODO arreter le traceur
+        // TODO envoyer parcours sur synthese
     }
 
     /** Initialise l'écouteur de localisation de l'utilisateur.
@@ -206,9 +221,9 @@ public class CourseActivity extends AppCompatActivity {
             public void onLocationChanged(Location location) {
                 GeoPoint point = new GeoPoint(location.getLatitude(), location.getLongitude());
                 // Si course lancée
-                if (routeManager.isRunning()) {
+                if (parcoursManager.isRunning()) {
                     // Met à jour le parcours
-                    routeManager.addLocation(location);
+                    parcoursManager.addLocation(location);
                     polyline.addPoint(point);
                     Log.d("LOGG APPLI", "Ajout dun nouveau point");
                 }
@@ -223,8 +238,8 @@ public class CourseActivity extends AppCompatActivity {
             @Override
             public void onProviderDisabled(String provider) {
                 // Mise en pause du parcours lorsque la localisation est désactivée
-                if (routeManager.isRunning()) {
-                    routeManager.pause();
+                if (parcoursManager.isRunning()) {
+                    parcoursManager.pause();
                     Toast.makeText(getApplicationContext(), "Localisation désactivée. Le parcours est mis en pause.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -232,8 +247,8 @@ public class CourseActivity extends AppCompatActivity {
             @Override
             public void onProviderEnabled(String provider) {
                 // Reprendre le parcours lorsque la localisation est réactivée
-                if (routeManager.isPaused()) {
-                    routeManager.resume();
+                if (parcoursManager.isPaused()) {
+                    parcoursManager.resume();
                     Toast.makeText(getApplicationContext(), "Localisation réactivée. Le parcours reprend.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -292,8 +307,8 @@ public class CourseActivity extends AppCompatActivity {
         map.onPause();
 
         // Met le parcours en pause lorsque l'activité est mise en pause
-        if (routeManager.isRunning()) {
-            routeManager.pause();
+        if (parcoursManager.isRunning()) {
+            parcoursManager.pause();
         }
     }
 
@@ -307,8 +322,8 @@ public class CourseActivity extends AppCompatActivity {
         map.onResume();
 
         // Reprend le parcours lorsque l'activité reprend
-        if (routeManager.isPaused()) {
-            routeManager.resume();
+        if (parcoursManager.isPaused()) {
+            parcoursManager.resume();
         }
     }
 
@@ -318,7 +333,7 @@ public class CourseActivity extends AppCompatActivity {
      */
     private void addInterestPoint(InterestPoint interestPoint) {
         // Ajoute le point d'intérêt au parcours
-        routeManager.addInterestPoint(interestPoint);
+        parcoursManager.addInterestPoint(interestPoint);
 
         // Affiche le point d'intérêt sur la carte
         Marker marker = new Marker(map);
@@ -328,8 +343,7 @@ public class CourseActivity extends AppCompatActivity {
         marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
-                // TODO ouvrir la popup de information/modification du point ?????
-                Toast.makeText(getApplicationContext(), "Ceci est un point d'interet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), interestPoint.getName() + ": " + interestPoint.getDescription(), Toast.LENGTH_SHORT).show();
                 // showInterestPointPopup(interestpoint) un truc comme ça
                 return true;
             }
@@ -381,33 +395,28 @@ public class CourseActivity extends AppCompatActivity {
 
     /**
      * Envoie une requête POST à l'API pour ajouter un nouveau parcours.
-     * @param routeManager Le parcours à ajouter.
      */
 
-    public void addParcoursToApi(RouteManager routeManager) {
+    public void addParcoursToApi() {
         // Crée un objet JSON contenant les détails du parcours
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject = routeManager.getRoute().toJson();
+            jsonObject = parcoursManager.getParcours().toJson();
         } catch (JSONException e) {
             Toast.makeText(getApplicationContext(),"Une erreur s'est produite", Toast.LENGTH_SHORT);
         }
 
         // Crée une requête JSON pour envoyer les détails du parcours à l'API
+        Log.d("test", jsonObject.toString() );
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonObject,
-                (Response.Listener<JSONObject>) response -> {
-                    /*try {
+                response -> {
+                    try {
                         // On récupère l'objet Parcours de la réponse
-                        JSONObject parcoursObject = response.getJSONObject("parcours");
-
-                        String parcoursName = parcoursObject.getString("name");
-                        String parcoursDescription = parcoursObject.getString("description");
-                        String parcoursDate = parcoursObject.getString("date");
-                        Parcours parcours = new Parcours(parcoursName, parcoursDate, parcoursDescription);
-                        adapter.add(parcours);
+                        String parcoursId = response.getString("id");
+                        switchToAccueil(parcoursId);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    }*/
+                    }
 
                 }, error -> {
                     // En cas d'erreur de l'API, cette méthode est appelée
@@ -416,7 +425,7 @@ public class CourseActivity extends AppCompatActivity {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> headers = new HashMap<>();
-                //headers.put("Authorization", "Bearer " + userToken);
+                headers.put("Authorization", token);
                 return headers;
             }
         };
@@ -425,5 +434,15 @@ public class CourseActivity extends AppCompatActivity {
         requestQueue.add(request);
     }
 
-
+    /**
+     * Renvoie l'id du parcours créé à l'accueil
+     * @param parcoursId id du parcours
+     */
+    private void switchToAccueil(String parcoursId) {
+        // création d'une intention pour demander lancement de l'activité accueil
+        Intent intention = new Intent();
+        intention.putExtra(Keys.PARCOURS_ID_KEY, parcoursId);
+        setResult(Activity.RESULT_OK, intention);
+        finish();
+    }
 }
