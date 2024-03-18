@@ -25,6 +25,12 @@ public class ParcoursManager {
     /** Liste de toutes les positions enregistrées pour le parcours */
     private List<Location> locations;
 
+    /** Début du chrnono */
+    private long startTime;
+
+    /** Fin du chrono */
+    private long endTime;
+
     /**
      * Construit un parcours.
      */
@@ -66,12 +72,13 @@ public class ParcoursManager {
 
     public void start() {
         running = true;
+        startTime = new Date().getTime();
         // TODO intégrer le timer ICI
     }
 
     public void stop() {
-        // TODO arreter le timer ICI A LA PLACE DU TODO ATTENTION à bien l'arreter avant de calculer les stats
         running = false;
+        endTime = new Date().getTime();
         calculateStatistics();
     }
 
@@ -81,7 +88,7 @@ public class ParcoursManager {
     private void calculateStatistics() {
         // Si il y a plus d'une position enregistrée
         if (locations.size() > 1) {
-            long time = 1; // TODO changer
+            long time = endTime - startTime;
             float distance = calculateDistance();
             double elevation = calculateElevation();
 
