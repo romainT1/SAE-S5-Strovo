@@ -22,18 +22,29 @@
         android:text="@string/messageConfirmationModification"
         android:textAlignment="center"/>
 
-    <Button
-        android:id="@+id/modifier"
+    <EditText
+        android:id="@+id/nouvelleDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="10dp"
+        android:height="50dp"
+        android:background="@android:drawable/editbox_background"
+        android:hint="@string/nouvelleDescription"
+        android:inputType="text"
+        android:maxLength="64" />
+
+    <Button
+        android:id="@+id/btnModifier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/modifier" />
 
     <Button
         android:id="@+id/btnSupprimer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="48dp"
         android:text="@string/supprimer" />
 
     <Button

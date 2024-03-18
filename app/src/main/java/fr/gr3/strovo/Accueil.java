@@ -520,12 +520,15 @@ public class Accueil extends AppCompatActivity {
 
 
             // Récupère les éléments de la fenêtre contextuelle
-            Button supprimer = dialog.findViewById(R.id.btnSupprimer);
-            Button annuler = dialog.findViewById(R.id.btnAnnuler);
+            EditText newDescriptionInput = dialog.findViewById(R.id.nouvelleDescription);
+            Button deleteButton = dialog.findViewById(R.id.btnSupprimer);
+            Button cancelButton = dialog.findViewById(R.id.btnAnnuler);
+            Button editButton = dialog.findViewById(R.id.btnModifier);
 
+            newDescriptionInput.setText(parcours.getDescription());
 
             // Gestion du clic sur le bouton "Supprimer"
-            supprimer.setOnClickListener(v -> {
+            deleteButton.setOnClickListener(v -> {
                 /* Lorsque l'utilisateur clique sur "Supprimer",
                  * supprime le parcours de l'API et de la liste
                  */
@@ -534,7 +537,22 @@ public class Accueil extends AppCompatActivity {
             });
 
             // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
-            annuler.setOnClickListener(v -> dialog.dismiss());
+            cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+
+            editButton.setOnClickListener(v -> {
+                /* Lorsque l'utilisateur clique sur "Modifier la description",
+                 * modifie la description du parcours
+                 */
+                String newDescriptionValue = newDescriptionInput.getText().toString();
+
+                // Si la description est différente de l'ancienne
+                if(!newDescriptionValue.equals(parcours.getDescription())) {
+                    parcours.setDescription(newDescriptionValue);
+                    updateParcoursFromApi(parcours);
+                }
+                dialog.dismiss();
+            });
 
             // Affiche la fenêtre contextuelle
             dialog.show();
@@ -548,6 +566,45 @@ public class Accueil extends AppCompatActivity {
             switchToSynthese(token, parcours.getId());
         });
     }
+
+    private void updateParcoursFromApi(Parcours parcours) {
+
+        // Crée un objet JSON avec la nouvelle description du parcours
+        JSONObject parcoursJson = new JSONObject();
+        try {
+            parcoursJson.put("description", parcours.getDescription());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Crée une requête PUT pour mettre à jour le parcours sur l'API
+        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, Endpoints.UPDATE_PARCOURS, parcoursJson,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Traitement de la réponse en cas de succès
+                        Log.d("PUT Response", response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Traitement de l'erreur
+                        Log.e("PUT Error", error.toString());
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", token);
+                return headers;
+            }
+        };
+
+        // Ajoute la requête de mise à jour à la file d'attente des requêtes HTTP
+        requestQueue.add(putRequest);
+    }
+
 
 
     /**
@@ -598,7 +655,7 @@ public class Accueil extends AppCompatActivity {
 
 
         // Récupére les éléments de la fenêtre contextuelle
-        EditText inputCommentaire = dialog.findViewById(R.id.inputCommentaire);
+        EditText inputCommentaire = dialog.findViewById(R.id.inputDescriptionParcours);
         EditText inputName = dialog.findViewById(R.id.inputNom);
 
 
@@ -666,6 +723,3 @@ public class Accueil extends AppCompatActivity {
         startActivity(intention);
     }
 }
-
-
-
