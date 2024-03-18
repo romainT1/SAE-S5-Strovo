@@ -52,8 +52,8 @@
     <string name="arreter">Arreter</string>
 
     <!-- Popup Supprimer parcours-->
-    <string name="modifParcours">Supprimer le parcours</string>
-    <string name="messageConfirmationSuppression">Etes-vous sûr de vouloir supprimer ce parcours</string>
+    <string name="modifParcours">Modifier le parcours</string>
+    <string name="messageConfirmationModification">Etes-vous sûr de vouloir modifier ce parcours</string>
 
     <!-- Popup permissions-->
     <string name="titrePopupPermissions">Autorisations nécessaires</string>
