@@ -14,6 +14,9 @@ import fr.gr3.strovo.map.InterestPoint;
 
 public class Parcours {
 
+    /** Identifiant du parcours */
+    private String id;
+
     /** Nom du parcours. */
     private String name;
 
@@ -71,6 +74,27 @@ public class Parcours {
     /**
      * Construit un parcours.
      *
+     * @param id identifiant du parcours
+     * @param name nom du parcours
+     * @param description description du parcours
+     * @param date date du parcours
+     */
+    public Parcours(String id, String name, String description, Date date) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.date = date;
+        this.time = 0;
+        this.speed = 0;
+        this.distance = 0;
+        this.elevation = 0;
+        this.interestPoints = new ArrayList<>();
+        this.coordinates = new ArrayList<>();
+    }
+
+    /**
+     * Construit un parcours.
+     *
      * @param name nom du parcours
      * @param description description du parcours
      * @param date date du parcours
@@ -85,6 +109,14 @@ public class Parcours {
         this.elevation = 0;
         this.interestPoints = new ArrayList<>();
         this.coordinates = new ArrayList<>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -168,7 +200,7 @@ public class Parcours {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         jsonObject.put("description", description);
-        jsonObject.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date));
+        jsonObject.put("date", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(date));
         jsonObject.put("time", time);
         jsonObject.put("speed", speed);
         jsonObject.put("distance", distance);

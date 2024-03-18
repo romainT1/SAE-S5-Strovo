@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     Toast.makeText(MainActivity.this, messageErreur, Toast.LENGTH_LONG).show();
-                    Log.d("Erreur connexion", error.getMessage());
                 });
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
         requestQueue.add(jsonObjectRequest);

@@ -59,6 +59,7 @@ import java.util.Map;
 
 
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.map.CourseActivity;
 import fr.gr3.strovo.utils.Keys;
 
@@ -232,15 +233,18 @@ public class Accueil extends AppCompatActivity {
         for (int i = 0; i < response.length(); i++) {
             try {
                 JSONObject parcoursJson = response.getJSONObject(i);
-                Parcours parcours = new Parcours(parcoursJson.getString("name"),
-                        parcoursJson.getString("date"),
+                Parcours parcours = new Parcours(
+                        parcoursJson.getString("id"),
+                        parcoursJson.getString("name"),
                         parcoursJson.getString("description"),
-                        parcoursJson.getString("id"
-                        ));
+                        new Date(String.valueOf(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(parcoursJson.getString("date"))))
+                        );
 
                 adapter.add(parcours);
             } catch (JSONException e) {
                 e.printStackTrace();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
             }
         }
 
@@ -569,6 +573,8 @@ public class Accueil extends AppCompatActivity {
 
     private void updateParcoursFromApi(Parcours parcours) {
 
+        String apiUrl = String.format(Endpoints.UPDATE_PARCOURS, parcours.getId());
+
         // Crée un objet JSON avec la nouvelle description du parcours
         JSONObject parcoursJson = new JSONObject();
         try {
@@ -578,7 +584,7 @@ public class Accueil extends AppCompatActivity {
         }
 
         // Crée une requête PUT pour mettre à jour le parcours sur l'API
-        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, Endpoints.UPDATE_PARCOURS, parcoursJson,
+        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, apiUrl, parcoursJson,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

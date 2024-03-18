@@ -10,5 +10,5 @@ public class Endpoints {
     public static final String ADD_PARCOURS = API_URL + "/parcours";
     public static final String DELETE_PARCOURS = API_URL + "/parcours/%s";
     public static final String GET_PARCOURS_BY_ID = API_URL + "/parcours/%s";
-    public static final String UPDATE_PARCOURS = API_URL + "/parcours" ;
+    public static final String UPDATE_PARCOURS = API_URL + "/parcours/%s" ;
 }

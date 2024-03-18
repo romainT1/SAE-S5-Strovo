@@ -203,6 +203,8 @@ public class CourseActivity extends AppCompatActivity {
         // TODO Sauvegarder parcours
         parcoursManager.stop();
         Parcours parcours = parcoursManager.getParcours();
+        locationListener = null;
+        locationManager = null;
         addParcoursToApi();
         // TODO arreter le traceur
         // TODO envoyer parcours sur synthese

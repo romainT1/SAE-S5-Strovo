@@ -70,9 +70,6 @@ public class CourseSynthese extends AppCompatActivity {
     /** Element graphique: compas */
     private CompassOverlay compassOverlay;
 
-    /** Element graphique: position actuelle de l'utilisateur */
-    private MyLocationNewOverlay myLocationNewOverlay;
-
     /**
      * Bouton de retour à l'activité précédente.
      */
@@ -143,13 +140,10 @@ public class CourseSynthese extends AppCompatActivity {
         scaleBarOverlay = new ScaleBarOverlay(map);
         compassOverlay = new CompassOverlay(getApplicationContext(), map);
         compassOverlay.enableCompass();
-        myLocationNewOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(getApplicationContext()), map);
-        myLocationNewOverlay.enableMyLocation();
 
         map.getOverlays().add(polyline);
         map.getOverlays().add(scaleBarOverlay);
         map.getOverlays().add(compassOverlay);
-        map.getOverlays().add(myLocationNewOverlay);
 
         initializeViews();
         btnRetour.setOnClickListener(new View.OnClickListener() {
