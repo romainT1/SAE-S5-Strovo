@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import fr.gr3.strovo.api.model.Parcours;
+
 public class ParcoursAdapter extends ArrayAdapter<Parcours> {
 
     /** Identifiant de la vue permettant d'afficher chaque item de la liste */
@@ -73,8 +75,8 @@ public class ParcoursAdapter extends ArrayAdapter<Parcours> {
             sauve = (SauvegardeTextView) uneVue.getTag();
         }
         // on place dans les 2 TextView les valeurs de l'item à afficher
-        sauve.nomParcours.setText(parcours.getNom());
-        sauve.dateHeure.setText(parcours.getDateHeure());
+        sauve.nomParcours.setText(parcours.getName());
+        sauve.dateHeure.setText(parcours.getDate());
         return uneVue;
     }
 }
