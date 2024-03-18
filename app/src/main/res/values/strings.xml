@@ -28,8 +28,11 @@
     <string name="erreurArretParcours">Pour arrêter un parcours, maintenez le clic sur le bouton pendant plus de 3 secondes.</string>
 
     <!-- Menus Modification -->
-    <string name="modifier">Modifier description</string>
-    <string name="supprimer">Supprimer</string>
+    <string name="modifParcours">Modifier le parcours</string>
+    <string name="messageConfirmationModification">Etes-vous sûr de vouloir modifier ce parcours</string>
+    <string name="nouvelleDescription">Ma nouvelle description</string>
+    <string name="modifier">Valider nouvelle description</string>
+    <string name="supprimer">Supprimer parcours</string>
     <string name="retour">Retour</string>
 
     <!-- Popup filtre -->
@@ -41,7 +44,6 @@
 
     <!-- Popup lancer course -->
     <string name="titreLancerCourse">Etes vous sûr de vouloir lancer une course ?</string>
-    <string name="inputCommentaire">Commentaire</string>
     <string name="inputNom">Nom</string>
 
     <!-- Popup point d'interet -->
@@ -50,10 +52,6 @@
     <string name="inputDescription">Description</string>
     <string name="ajouterPointInteret">Ajouter un point d\'interet</string>
     <string name="arreter">Arreter</string>
-
-    <!-- Popup Supprimer parcours-->
-    <string name="modifParcours">Modifier le parcours</string>
-    <string name="messageConfirmationModification">Etes-vous sûr de vouloir modifier ce parcours</string>
 
     <!-- Popup permissions-->
     <string name="titrePopupPermissions">Autorisations nécessaires</string>
