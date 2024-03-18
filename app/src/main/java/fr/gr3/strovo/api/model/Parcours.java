@@ -104,9 +104,6 @@ public class Parcours {
     }
 
     public String getDate() {
-        // Créer un objet SimpleDateFormat pour le format
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
-
         // Formater la date dans le format souhaité
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         String formattedDate = sdf.format(date);
@@ -171,7 +168,7 @@ public class Parcours {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         jsonObject.put("description", description);
-        jsonObject.put("date", new SimpleDateFormat("yyyy-MM-dd").format(date));
+        jsonObject.put("date", new SimpleDateFormat("dd/MM/yyyy HH:mm").format(date));
         jsonObject.put("time", time);
         jsonObject.put("speed", speed);
         jsonObject.put("distance", distance);
