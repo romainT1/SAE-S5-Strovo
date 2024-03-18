@@ -19,8 +19,15 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/messageConfirmationSuppression"
+        android:text="@string/messageConfirmationModification"
         android:textAlignment="center"/>
+
+    <Button
+        android:id="@+id/modifier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/modifier" />
 
     <Button
         android:id="@+id/btnSupprimer"
