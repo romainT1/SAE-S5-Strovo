@@ -5,12 +5,15 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.api.model.User;
 
 /**
@@ -26,10 +29,16 @@ public class StrovoApi {
 
     /** Point de terminaison pour l'identification d'un utilisateur  */
     public static final String LOGIN_URL = API_URL + "/user/login?email=%s&password=%s";
+
+    /** Point de terminaison pour récupérer la liste des parcours d'un utilisateur */
     public static final String GET_PARCOURS = API_URL + "/parcours";
     public static final String ADD_PARCOURS = API_URL + "/parcours";
+
+    /** Point de terminaison pour supprimer un parcours d'un utilisateur */
     public static final String DELETE_PARCOURS = API_URL + "/parcours/%s";
     public static final String GET_PARCOURS_BY_ID = API_URL + "/parcours/%s";
+
+    /** Point de terminaison pour mettre à jour un parcours d'un utilisateur */
     public static final String UPDATE_PARCOURS = API_URL + "/parcours/%s" ;
 
 
@@ -85,11 +94,11 @@ public class StrovoApi {
     }
 
     /**
-     * Construit une requête pour récupérer la listes des parcours d'un utilisateur
+     * Construit une requête pour récupérer la listes des parcours d'un utilisateur.
      * @param token jeton de connexion de l'utilisateur
      * @param responseListener Response.Listener exécuté en cas de succès
      * @param errorListener Response.ErrorListener exécuté en cas d'échec
-     * @return un requête de récupération des parcours de l'utilisateur
+     * @return une requête de récupération des parcours de l'utilisateur
      */
     public JsonArrayRequest getParcours(String token, Response.Listener responseListener,
                                  Response.ErrorListener errorListener) {
@@ -98,10 +107,69 @@ public class StrovoApi {
                 responseListener, errorListener) {
             @Override
             public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", token);
-                return headers;
+                return createAuthorizationHeader(token);
             }
         };
+    }
+
+    /**
+     * Construit une requête pour supprimer un parcours de la listes des parcours d'un utilisateur.
+     * @param token jeton de connexion de l'utilisateur
+     * @param parcoursId identifiant du parcours à supprimer
+     * @param responseListener Response.Listener exécuté en cas de succès
+     * @param errorListener Response.ErrorListener exécuté en cas d'échec
+     * @return une requête de suppression d'un parcours de l'utilisateur
+     */
+    public StringRequest deleteParcours(String token, String parcoursId, Response.Listener responseListener,
+                               Response.ErrorListener errorListener) {
+
+        String apiUrl = String.format(DELETE_PARCOURS, parcoursId);
+
+        return new StringRequest(Request.Method.DELETE, apiUrl, responseListener, errorListener) {
+            @Override
+            public Map<String, String> getHeaders() {
+                return createAuthorizationHeader(token);
+            }
+        };
+    }
+
+    /**
+     * Construit une requête pour mettre à jour un parcours d'un utilisateur.
+     * @param token jeton de connexion de l'utilisateur
+     * @param parcours parcours à modifier
+     * @param responseListener Response.Listener exécuté en cas de succès
+     * @param errorListener Response.ErrorListener exécuté en cas d'échec
+     * @return une requête de mise à jour d'un parcours de l'utilisateur
+     */
+    public JsonObjectRequest updateParcours(String token, Parcours parcours, Response.Listener responseListener,
+                               Response.ErrorListener errorListener) {
+
+        String apiUrl = String.format(UPDATE_PARCOURS, parcours.getId());
+
+        // Crée un objet JSON avec la nouvelle description du parcours
+        JSONObject parcoursJson = new JSONObject();
+        try {
+            parcoursJson.put("description", parcours.getDescription());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return new JsonObjectRequest(Request.Method.PUT, apiUrl, parcoursJson, responseListener, errorListener) {
+            @Override
+            public Map<String, String> getHeaders() {
+                return createAuthorizationHeader(token);
+            }
+        };
+    }
+
+    /**
+     * Crée le header de la requête avec le jeton de connexion api de l'utilisateur.
+     * @param token jeton de connexion api
+     * @return
+     */
+    private Map<String, String> createAuthorizationHeader(String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", token);
+        return headers;
     }
 }
