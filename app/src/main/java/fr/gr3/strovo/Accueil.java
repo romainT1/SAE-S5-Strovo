@@ -7,8 +7,9 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.SearchView;
 
-
+import fr.gr3.strovo.api.model.Parcours;
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -48,6 +49,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,8 +64,8 @@ import java.util.Map;
 
 
 import fr.gr3.strovo.api.Endpoints;
-import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.map.CourseActivity;
+import fr.gr3.strovo.map.InterestPoint;
 import fr.gr3.strovo.utils.Keys;
 
 
@@ -157,6 +162,14 @@ public class Accueil extends AppCompatActivity {
         courseActivityLauncher= registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 this::couseActivityDone);
+
+        try {
+            unsentFiles();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (Exception ignored) {
+
+        }
     }
 
 
@@ -728,4 +741,32 @@ public class Accueil extends AppCompatActivity {
         // lancement de l'activité accueil via l'intention préalablement créée
         startActivity(intention);
     }
+
+    private void unsentFiles() throws FileNotFoundException {
+        InputStreamReader fichier =
+                new InputStreamReader(openFileInput("parcoursTemp"));
+        BufferedReader fichierTexte = new BufferedReader(fichier);
+        String ligne;
+        try {
+            while ((ligne = fichierTexte.readLine()) != null) {
+                // Créer un JSONObject à partir de la ligne
+                JSONObject jsonParcours = new JSONObject(ligne);
+                sendToApi(jsonParcours);
+            }
+            deleteFile("parcoursTemp");
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendToApi(JSONObject jsonParcours) {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
+                response -> {
+
+                }, error -> {
+            // En cas d'erreur de l'API, cette méthode est appelée
+        });
+    }
+
+
 }
