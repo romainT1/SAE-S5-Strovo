@@ -1,11 +1,14 @@
 package fr.gr3.strovo;
 
 
+
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.SearchView;
+
 
 import fr.gr3.strovo.api.model.Parcours;
 import android.Manifest;
@@ -30,7 +33,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
+
 import androidx.appcompat.app.AppCompatActivity;
+
+
 
 
 import com.android.volley.AuthFailureError;
@@ -44,9 +51,13 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
 
 
 import java.io.BufferedReader;
@@ -63,10 +74,14 @@ import java.util.List;
 import java.util.Map;
 
 
+
+
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.map.CourseActivity;
 import fr.gr3.strovo.map.InterestPoint;
 import fr.gr3.strovo.utils.Keys;
+
+
 
 
 /**
@@ -76,70 +91,105 @@ import fr.gr3.strovo.utils.Keys;
  */
 public class Accueil extends AppCompatActivity {
 
+
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
+
+
+    /** Copie de parcoursList */
+    private List<Parcours> parcoursListOrigine;
 
 
     /** Composant graphique du bouton de filtre */
     private Button filterButton;
 
 
+
+
     /** Composant graphique de la liste des parcours */
     private ListView listViewParcours;
+
+
 
 
     /** Composant graphique du bouton qui lance un enregistrement de parcours */
     private Button lancerParcoursButton;
 
 
+
+
     /** Composant graphique du choix de la date dans le filtre */
     private DatePickerDialog picker;
+
+
 
 
     /** Composant graphique du TextView quand aucun parcours est retourné. */
     private TextView emptyParcoursText;
 
 
+
+
     /** Liste des parcours de l'utilisateur */
     private List<Parcours> parcoursList;
+
+
 
 
     /** Adaptateur pour la liste des parcours */
     private ParcoursAdapter adapter;
 
 
+
+
     /** Nom du parcours */
     private String nameParcours;
+
+
 
 
     /** Intervalle des dates des parcours */
     private Date[] dateIntervalle;
 
 
+
+
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;
+
+
 
 
     /** Handler pour gérer le délai d'appel à l'API */
     private Handler handler = new Handler();
 
 
+
+
     /** Pour gérer le délai de l'appel à l'API */
     private Runnable runnable;
+
+
 
 
     /** Handler pour gérer le délai sur le clic du bouton */
     private Handler handlerButton;
 
+
     /** Lanceur de l'activité course */
     private ActivityResultLauncher<Intent> courseActivityLauncher;
+
+
 
 
     /** Définit le status du clic sur le bouton */
     private boolean longClickDetected;
 
+
     /** Token de connexion de l'utilisateur */
     private String token;
+
+
 
 
     /**
@@ -153,23 +203,30 @@ public class Accueil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
+
         // Récupère le token
         token = getIntent().getStringExtra(Keys.TOKEN_KEY);
+
 
         initializeViews();
         setupEventListeners();
 
+
         courseActivityLauncher= registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 this::couseActivityDone);
+
 
         try {
             unsentFiles();
         } catch (FileNotFoundException ignored) {
         } catch (Exception ignored) {
 
+
         }
     }
+
+
 
 
     /**
@@ -182,16 +239,22 @@ public class Accueil extends AppCompatActivity {
         String apiUrl = Endpoints.GET_PARCOURS;
 
 
+
+
         if (nameParcours != null && !nameParcours.equals("")) {
             apiUrl += "?nom=%s";
             apiUrl = String.format(apiUrl, nameParcours);
         }
 
 
+
+
         if (dateIntervalle != null) {
             apiUrl += "?dateDebut=%s&dateFin=%s";
             apiUrl = String.format(apiUrl, dateIntervalle[0].getTime(), dateIntervalle[1].getTime());
         }
+
+
 
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
@@ -202,6 +265,8 @@ public class Accueil extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONArray response) {
                         parseJsonResponse(response);
+
+
 
 
                         // Vérifie si la liste des parcours est vide
@@ -229,9 +294,12 @@ public class Accueil extends AppCompatActivity {
             }
         };
 
+
         // Ajoute la requête à la file d'attente
         requestQueue.add(jsonArrayRequest);
     }
+
+
 
 
     /**
@@ -250,7 +318,8 @@ public class Accueil extends AppCompatActivity {
                         parcoursJson.getString("name"),
                         parcoursJson.getString("description"),
                         new Date(String.valueOf(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(parcoursJson.getString("date"))))
-                        );
+                );
+
 
                 adapter.add(parcours);
             } catch (JSONException e) {
@@ -260,8 +329,14 @@ public class Accueil extends AppCompatActivity {
             }
         }
 
+
+        parcoursListOrigine = new ArrayList<>(parcoursList);
         adapter.notifyDataSetChanged();
     }
+
+
+
+
 
 
     /**
@@ -271,8 +346,12 @@ public class Accueil extends AppCompatActivity {
     public void deleteParcoursFromApi(Parcours parcours) {
 
 
+
+
         // Construit l'URL spécifique pour le parcours à supprimer
         String apiUrl = String.format(Endpoints.DELETE_PARCOURS, parcours.getId());
+
+
 
 
         // Crée une requête DELETE pour supprimer le parcours de l'API
@@ -304,9 +383,12 @@ public class Accueil extends AppCompatActivity {
             }
         };
 
+
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
         requestQueue.add(deleteRequest);
     }
+
+
 
 
     /**
@@ -330,6 +412,8 @@ public class Accueil extends AppCompatActivity {
     }
 
 
+
+
     /**
      * Initialise les vues de l'activité et configure les écouteurs d'événements.
      */
@@ -343,8 +427,12 @@ public class Accueil extends AppCompatActivity {
         emptyParcoursText.setVisibility(View.INVISIBLE);
 
 
+
+
         // Initialisation de la liste des parcours
         parcoursList = new ArrayList<>();
+
+
 
 
         // Création d'un adaptateur personnalisé pour la liste des parcours
@@ -352,9 +440,13 @@ public class Accueil extends AppCompatActivity {
         listViewParcours.setAdapter(adapter);
 
 
+
+
         // Initialise la file d'attente des requêtes HTTP avec Volley
         requestQueue = Volley.newRequestQueue(this);
     }
+
+
 
 
     /**
@@ -365,9 +457,12 @@ public class Accueil extends AppCompatActivity {
         searchBarListener();
 
 
+
+
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
     }
+
 
     private Runnable longClickRunnable = new Runnable() {
         @Override
@@ -379,14 +474,20 @@ public class Accueil extends AppCompatActivity {
     };
 
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
 
 
+
+
         // Appelle la méthode pour récupérer les données de l'API
         fetchParcoursFromApi(null, null);
     }
+
+
 
 
     @Override
@@ -397,6 +498,8 @@ public class Accueil extends AppCompatActivity {
             requestQueue.cancelAll(this);
         }
     }
+
+
 
 
     /**
@@ -413,28 +516,34 @@ public class Accueil extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Supprimer les appels en attente
-                handler.removeCallbacks(runnable);
-
-
-                // Définir un délai avant l'appel à l'API
-                runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        String rechercheNomParcours = newText.replace(" ", "+");
-                        fetchParcoursFromApi(rechercheNomParcours, dateIntervalle);
+                // Filtrer la liste des parcours en fonction du texte saisi
+                List<Parcours> filteredList = new ArrayList<>();
+                if (newText.isEmpty()) {
+                    // Si la chaîne de recherche est vide, afficher la liste complète des parcours
+                    filteredList.addAll(parcoursListOrigine);
+                } else {
+                    for (Parcours parcours : parcoursListOrigine) { // Utiliser parcoursListOrigine ici
+                        if (parcours.getName().toLowerCase().contains(newText.toLowerCase())) {
+                            filteredList.add(parcours);
+                        }
                     }
-                };
-
-
-                // Attendre 300 millisecondes avant d'appeler l'API (modifiable selon vos besoins)
-                handler.postDelayed(runnable, 300);
+                }
+                // Mettre à jour l'adaptateur avec la liste filtrée
+                adapter.clear();
+                adapter.addAll(filteredList);
+                adapter.notifyDataSetChanged();
 
 
                 return true;
             }
         });
     }
+
+
+
+
+
+
 
 
     /**
@@ -447,13 +556,19 @@ public class Accueil extends AppCompatActivity {
         final Dialog dialog = new Dialog(Accueil.this);
 
 
+
+
         // Définis le contenu de la fenêtre contextuelle
         dialog.setContentView(R.layout.popup_filtre);
+
+
 
 
         // Récupère les éléments de la fenêtre contextuelle
         EditText inputDateMin = dialog.findViewById(R.id.inputDureeMin);
         EditText inputDateMax = dialog.findViewById(R.id.inputDureeMax);
+
+
 
 
         // Gestion du clic sur les champs de date pour afficher le calendrier
@@ -466,6 +581,8 @@ public class Accueil extends AppCompatActivity {
         });
 
 
+
+
         inputDateMax.setInputType(InputType.TYPE_NULL);
         inputDateMax.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -475,8 +592,12 @@ public class Accueil extends AppCompatActivity {
         });
 
 
+
+
         Button rechercher = dialog.findViewById(R.id.btnRechercher);
         Button annuler = dialog.findViewById(R.id.btnAnnuler);
+
+
 
 
         // Gère le clic sur le bouton "rechercher"
@@ -488,11 +609,15 @@ public class Accueil extends AppCompatActivity {
                  */
 
 
+
+
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
                 try {
                     Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
                     Date dateMax = simpleDateFormat.parse(inputDateMax.getText().toString());
                     Date[] dateFilter = {dateMin, dateMax};
+
+
 
 
                     parcoursList.clear();
@@ -502,9 +627,12 @@ public class Accueil extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
 
+
                 dialog.dismiss();
             }
         });
+
+
 
 
         // Gère le clic sur le bouton "Annuler"
@@ -516,9 +644,13 @@ public class Accueil extends AppCompatActivity {
         });
 
 
+
+
         // Affiche la fenêtre contextuelle
         dialog.show();
     }
+
+
 
 
     /**
@@ -535,13 +667,17 @@ public class Accueil extends AppCompatActivity {
             dialog.setContentView(R.layout.popup_modif_parcours);
 
 
+
+
             // Récupère les éléments de la fenêtre contextuelle
             EditText newDescriptionInput = dialog.findViewById(R.id.nouvelleDescription);
             Button deleteButton = dialog.findViewById(R.id.btnSupprimer);
             Button cancelButton = dialog.findViewById(R.id.btnAnnuler);
             Button editButton = dialog.findViewById(R.id.btnModifier);
 
+
             newDescriptionInput.setText(parcours.getDescription());
+
 
             // Gestion du clic sur le bouton "Supprimer"
             deleteButton.setOnClickListener(v -> {
@@ -552,8 +688,11 @@ public class Accueil extends AppCompatActivity {
                 dialog.dismiss();
             });
 
+
             // Lorsque l'utilisateur clique sur "Annuler", ferme la boîte de dialogue
             cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+
 
 
             editButton.setOnClickListener(v -> {
@@ -561,6 +700,7 @@ public class Accueil extends AppCompatActivity {
                  * modifie la description du parcours
                  */
                 String newDescriptionValue = newDescriptionInput.getText().toString();
+
 
                 // Si la description est différente de l'ancienne
                 if(!newDescriptionValue.equals(parcours.getDescription())) {
@@ -570,10 +710,13 @@ public class Accueil extends AppCompatActivity {
                 dialog.dismiss();
             });
 
+
             // Affiche la fenêtre contextuelle
             dialog.show();
             return true;
         });
+
+
 
 
         listViewParcours.setOnItemClickListener((parent, view, position, id) -> {
@@ -583,9 +726,12 @@ public class Accueil extends AppCompatActivity {
         });
     }
 
+
     private void updateParcoursFromApi(Parcours parcours) {
 
+
         String apiUrl = String.format(Endpoints.UPDATE_PARCOURS, parcours.getId());
+
 
         // Crée un objet JSON avec la nouvelle description du parcours
         JSONObject parcoursJson = new JSONObject();
@@ -594,6 +740,7 @@ public class Accueil extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
 
         // Crée une requête PUT pour mettre à jour le parcours sur l'API
         JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, apiUrl, parcoursJson,
@@ -619,9 +766,13 @@ public class Accueil extends AppCompatActivity {
             }
         };
 
+
         // Ajoute la requête de mise à jour à la file d'attente des requêtes HTTP
         requestQueue.add(putRequest);
     }
+
+
+
 
 
 
@@ -639,6 +790,8 @@ public class Accueil extends AppCompatActivity {
     }
 
 
+
+
     /**
      * Affiche la popup des permissions manquantes.
      */
@@ -646,18 +799,24 @@ public class Accueil extends AppCompatActivity {
         // Créé une instance de Dialog
         final Dialog dialog = new Dialog(Accueil.this);
 
+
         // Définis le contenu de la fenêtre contextuelle
         dialog.setContentView(R.layout.popup_permission);
 
+
         Button closeButton = dialog.findViewById(R.id.fermer);
+
 
         // Gère le clic sur le bouton "Fermer"
         closeButton.setOnClickListener(view -> {
             dialog.dismiss();
         });
 
+
         dialog.show();
     }
+
+
 
 
     /**
@@ -668,8 +827,12 @@ public class Accueil extends AppCompatActivity {
         final Dialog dialog = new Dialog(Accueil.this);
 
 
+
+
         // Définis le contenu de la fenêtre contextuelle
         dialog.setContentView(R.layout.popup_lancer_course);
+
+
 
 
         // Récupére les éléments de la fenêtre contextuelle
@@ -677,8 +840,12 @@ public class Accueil extends AppCompatActivity {
         EditText inputName = dialog.findViewById(R.id.inputNom);
 
 
+
+
         Button confirmer = dialog.findViewById(R.id.confirmer);
         Button annuler = dialog.findViewById(R.id.annuler);
+
+
 
 
         // Gère le clic sur le bouton "Confirmer"
@@ -688,19 +855,26 @@ public class Accueil extends AppCompatActivity {
         });
 
 
+
+
         // Gère le clic sur le bouton "Annuler"
         annuler.setOnClickListener(view -> dialog.dismiss());
 
 
+
+
         dialog.show();
     }
+
 
     /**
      * Appelé quand l'activité course renvoie le parcours effectué au format json
      */
     private void parcoursDone() {
 
+
     }
+
 
     /**
      * Exécuté au retour de l'activité course
@@ -708,10 +882,12 @@ public class Accueil extends AppCompatActivity {
     private void couseActivityDone(ActivityResult result) {
         Intent intent = result.getData();
 
+
         if (result.getResultCode() == Activity.RESULT_OK) {
             switchToSynthese(token, intent.getStringExtra(Keys.PARCOURS_ID_KEY));
         }
     }
+
 
     /**
      * Lance l'intention course.
@@ -727,6 +903,7 @@ public class Accueil extends AppCompatActivity {
         courseActivityLauncher.launch(intention);
     }
 
+
     /**
      * Lance l'intention synthèse.
      * @param token valeur du token à transmettre à l'activité
@@ -741,7 +918,9 @@ public class Accueil extends AppCompatActivity {
         startActivity(intention);
     }
 
+
     private void unsentFiles() throws FileNotFoundException {
+
 
         InputStreamReader fichier =
                 new InputStreamReader(openFileInput("parcoursTemp"));
@@ -759,9 +938,11 @@ public class Accueil extends AppCompatActivity {
         }
     }
 
+
     private void sendToApi(JSONObject jsonParcours) {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
                 response -> {
+
 
                 }, error -> {
             // En cas d'erreur de l'API, cette méthode est appelée
@@ -769,4 +950,7 @@ public class Accueil extends AppCompatActivity {
     }
 
 
+
+
 }
+
