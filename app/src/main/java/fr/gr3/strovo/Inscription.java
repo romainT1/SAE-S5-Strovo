@@ -8,18 +8,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 
-import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.User;
 
