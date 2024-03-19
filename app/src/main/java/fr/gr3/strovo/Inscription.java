@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -121,7 +122,8 @@ public class Inscription extends AppCompatActivity {
     private void register(User user) {
         try {
             JsonObjectRequest request = StrovoApi.getInstance().registerUser(user,
-                    onRegisterSuccess(), onRegisterError());
+                    this::onRegisterSuccess, this::onRegisterError
+            );
             requestQueue.add(request);
         } catch (JSONException e) {
             showError("Une erreur s'est produite lors de l'inscription");
@@ -130,29 +132,23 @@ public class Inscription extends AppCompatActivity {
 
     /**
      * Exécuté lorsque l'inscription de l'utilisateur est réussie.
-     * @return un objet Response.Listener
      */
-    private Response.Listener<JSONObject> onRegisterSuccess() {
-        return response -> {
-            showError("Compte créé avec succès !");
-            finish(); // Termine l'activité inscription
-        };
+    private void onRegisterSuccess(JSONObject response) {
+        showError("Compte créé avec succès !");
+        finish(); // Termine l'activité inscription
     }
 
     /**
      * Exécuté lorsque l'inscription de l'utilisateur en echec.
-     * @return un objet Response.ErrorListener
      */
-    private Response.ErrorListener onRegisterError() {
-        return error -> {
-            String messageErreur = getString(R.string.err);
+    private void onRegisterError(VolleyError error) {
+        String messageErreur = getString(R.string.err);
 
-            // Si erreur liée à un problème de conflit
-            if (error.networkResponse != null
-                && error.networkResponse.statusCode == 409) {
-                    messageErreur = getString(R.string.errInscriptionConflict);
-            }
-            showError(messageErreur);
-        };
+        // Si erreur liée à un problème de conflit
+        if (error.networkResponse != null
+            && error.networkResponse.statusCode == 409) {
+                messageErreur = getString(R.string.errInscriptionConflict);
+        }
+        showError(messageErreur);
     }
 }

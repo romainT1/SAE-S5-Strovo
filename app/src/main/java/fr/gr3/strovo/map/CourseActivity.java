@@ -55,6 +55,7 @@ import java.util.Map;
 import fr.gr3.strovo.CourseSynthese;
 import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.utils.Keys;
 
@@ -428,41 +429,27 @@ public class CourseActivity extends AppCompatActivity {
      * Envoie une requête POST à l'API pour ajouter un nouveau parcours.
      */
 
-    public void addParcoursToApi() {
-        // Crée un objet JSON contenant les détails du parcours
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject = parcoursManager.getParcours().toJson();
-        } catch (JSONException e) {
-            Toast.makeText(getApplicationContext(),"Une erreur s'est produite", Toast.LENGTH_SHORT);
-        }
+    public void addParcoursToApi() throws JSONException {
 
-        // Crée une requête JSON pour envoyer les détails du parcours à l'API
-        Log.d("test", jsonObject.toString() );
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonObject,
-                response -> {
-                    try {
-                        // On récupère l'objet Parcours de la réponse
-                        String parcoursId = response.getString("id");
-                        switchToAccueil(parcoursId);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }, error -> {
-                    // En cas d'erreur de l'API, cette méthode est appelée
-                })
-        {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", token);
-                return headers;
-            }
-        };
-
+        JsonObjectRequest request = StrovoApi.getInstance().addParcours(token, parcoursManager.getParcours(),
+                this::onAddParcoursSuccess,
+                error -> showError("Impossible d'enregistrer le parcours")
+        );
         // Ajoute la requête à la file d'attente des requêtes HTTP
         requestQueue.add(request);
+    }
+
+    /**
+     * Exécuté lorsque l'ajout du parcours est réussi.
+     */
+    private void onAddParcoursSuccess(JSONObject  response) {
+        try {
+            // On récupère l'objet Parcours de la réponse
+            String parcoursId = response.getString("id");
+            switchToAccueil(parcoursId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -475,5 +462,10 @@ public class CourseActivity extends AppCompatActivity {
         intention.putExtra(Keys.PARCOURS_ID_KEY, parcoursId);
         setResult(Activity.RESULT_OK, intention);
         finish();
+    }
+
+    /** Crée un toast pour afficher l'erreur. */
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

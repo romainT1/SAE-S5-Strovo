@@ -1,45 +1,28 @@
 package fr.gr3.strovo;
 
-
-
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.widget.SearchView;
-
-
-import fr.gr3.strovo.api.StrovoApi;
-import fr.gr3.strovo.api.model.Parcours;
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.app.Dialog;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
-
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-
-
-
+import androidx.appcompat.widget.SearchView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -51,15 +34,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-
-
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-
-
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -74,16 +51,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
-
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.StrovoApi;
+import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.map.CourseActivity;
-import fr.gr3.strovo.map.InterestPoint;
 import fr.gr3.strovo.utils.Keys;
-
-
-
 
 /**
  * Classe représentant l'activité principale de l'application, correspondant à l'écran d'accueil.
@@ -92,105 +64,59 @@ import fr.gr3.strovo.utils.Keys;
  */
 public class Accueil extends AppCompatActivity {
 
-
     /** Composant graphique de la recherche */
     private SearchView rechercheNom;
-
 
     /** Copie de parcoursList */
     private List<Parcours> parcoursListOrigine;
 
-
     /** Composant graphique du bouton de filtre */
     private Button filterButton;
-
-
-
 
     /** Composant graphique de la liste des parcours */
     private ListView listViewParcours;
 
-
-
-
     /** Composant graphique du bouton qui lance un enregistrement de parcours */
     private Button lancerParcoursButton;
-
-
-
 
     /** Composant graphique du choix de la date dans le filtre */
     private DatePickerDialog picker;
 
-
-
-
     /** Composant graphique du TextView quand aucun parcours est retourné. */
     private TextView emptyParcoursText;
-
-
-
 
     /** Liste des parcours de l'utilisateur */
     private List<Parcours> parcoursList;
 
-
-
-
     /** Adaptateur pour la liste des parcours */
     private ParcoursAdapter adapter;
-
-
-
 
     /** Nom du parcours */
     private String nameParcours;
 
-
-
-
     /** Intervalle des dates des parcours */
     private Date[] dateIntervalle;
-
-
-
 
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;
 
-
-
-
     /** Handler pour gérer le délai d'appel à l'API */
     private Handler handler = new Handler();
-
-
-
 
     /** Pour gérer le délai de l'appel à l'API */
     private Runnable runnable;
 
-
-
-
     /** Handler pour gérer le délai sur le clic du bouton */
     private Handler handlerButton;
-
 
     /** Lanceur de l'activité course */
     private ActivityResultLauncher<Intent> courseActivityLauncher;
 
-
-
-
     /** Définit le status du clic sur le bouton */
     private boolean longClickDetected;
 
-
     /** Token de connexion de l'utilisateur */
     private String token;
-
-
 
 
     /**
@@ -204,25 +130,20 @@ public class Accueil extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accueil);
 
-
         // Récupère le token
         token = getIntent().getStringExtra(Keys.TOKEN_KEY);
 
-
         initializeViews();
         setupEventListeners();
-
 
         courseActivityLauncher= registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 this::couseActivityDone);
 
-
         try {
             unsentFiles();
         } catch (FileNotFoundException ignored) {
         } catch (Exception ignored) {
-
 
         }
     }
@@ -234,8 +155,8 @@ public class Accueil extends AppCompatActivity {
      * Récupère les données des parcours depuis l'API en utilisant la bibliothèque Volley.
      */
     private void getParcoursFromApi() {
-        JsonArrayRequest request = StrovoApi.getInstance().getParcours(token, onGetParcoursSuccess(),
-                onGetParcoursError());
+        JsonArrayRequest request = StrovoApi.getInstance().getParcours(token,
+                this::onGetParcoursSuccess, this::onGetParcoursError);
 
         // Ajoute la requête à la file d'attente
         requestQueue.add(request);
@@ -243,32 +164,26 @@ public class Accueil extends AppCompatActivity {
 
     /**
      * Exécuté lorsque la récupération des parcours est réussie.
-     * @return un objet Response.Listener
      */
-    private Response.Listener<JSONArray> onGetParcoursSuccess() {
-        return response -> {
-            parseJsonResponse(response);
+    private void onGetParcoursSuccess(JSONArray response) {
+        parseJsonResponse(response);
 
-            // Vérifie si la liste des parcours est vide
-            if (parcoursList.isEmpty()) {
-                emptyParcoursText.setVisibility(View.VISIBLE);
-            }
-        };
+        // Vérifie si la liste des parcours est vide
+        if (parcoursList.isEmpty()) {
+            emptyParcoursText.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
      * Exécuté lorsque la récupération des parcours est réussie.
-     * @return un objet Response.ErrorListener
      */
-    private Response.ErrorListener onGetParcoursError() {
-        return error -> {
-            // Si token de connexion invalide
-            if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
-                finish(); // Renvoie vers la page de connexion
-            } else {
-                emptyParcoursText.setVisibility(View.VISIBLE);
-            }
-        };
+    private void onGetParcoursError(VolleyError error) {
+        // Si token de connexion invalide
+        if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
+            finish(); // Renvoie vers la page de connexion
+        } else {
+            emptyParcoursText.setVisibility(View.VISIBLE);
+        }
     }
 
 
@@ -305,61 +220,19 @@ public class Accueil extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-
-
-
-
-
     /**
      * Envoie une requête DELETE à l'API pour supprimer un parcours.
      * @param parcours Le parcours à supprimer.
      */
     public void deleteParcoursFromApi(Parcours parcours) {
 
-
-
-
-        // Construit l'URL spécifique pour le parcours à supprimer
-        String apiUrl = String.format(Endpoints.DELETE_PARCOURS, parcours.getId());
-
-
-
-
-        // Crée une requête DELETE pour supprimer le parcours de l'API
-        StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, apiUrl,
-                new Response.Listener<String>()
-                {
-                    @Override
-                    public void onResponse(String response) {
-                        // Traitement de la réponse en cas de succès
-                        Log.d("DELETE Response", response);
-                        adapter.remove(parcours);
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // Traitement de l'erreur
-                        Log.e("DELETE Error", error.toString());
-                    }
-                }
-        )
-        {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", token);
-                return headers;
-            }
-        };
-
+        StringRequest request = StrovoApi.getInstance().deleteParcours(token, parcours.getId(),
+                response -> adapter.remove(parcours),
+                error -> Log.e("DELETE Error", error.toString()));
 
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
-        requestQueue.add(deleteRequest);
+        requestQueue.add(request);
     }
-
-
 
 
     /**
@@ -697,49 +570,18 @@ public class Accueil extends AppCompatActivity {
         });
     }
 
-
+    /**
+     * Envoie une requête PUT à l'API pour modifier un parcours.
+     * @param parcours parcours modifié
+     */
     private void updateParcoursFromApi(Parcours parcours) {
-
-
-        String apiUrl = String.format(Endpoints.UPDATE_PARCOURS, parcours.getId());
-
-
-        // Crée un objet JSON avec la nouvelle description du parcours
-        JSONObject parcoursJson = new JSONObject();
-        try {
-            parcoursJson.put("description", parcours.getDescription());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        // Crée une requête PUT pour mettre à jour le parcours sur l'API
-        JsonObjectRequest putRequest = new JsonObjectRequest(Request.Method.PUT, apiUrl, parcoursJson,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        // Traitement de la réponse en cas de succès
-                        Log.d("PUT Response", response.toString());
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // Traitement de l'erreur
-                        Log.e("PUT Error", error.toString());
-                    }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", token);
-                return headers;
-            }
-        };
-
+        JsonObjectRequest request = StrovoApi.getInstance().updateParcours(token, parcours,
+                response -> showError("Description modifiée"),
+                error -> Log.e("UPDATE Error", error.toString())
+        );
 
         // Ajoute la requête de mise à jour à la file d'attente des requêtes HTTP
-        requestQueue.add(putRequest);
+        requestQueue.add(request);
     }
 
 
@@ -920,6 +762,11 @@ public class Accueil extends AppCompatActivity {
         });
     }
 
+
+    /** Crée un toast pour afficher l'erreur. */
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
 
 
