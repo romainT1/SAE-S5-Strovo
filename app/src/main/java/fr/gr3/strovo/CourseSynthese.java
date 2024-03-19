@@ -178,6 +178,7 @@ public class CourseSynthese extends AppCompatActivity {
         marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
+
                 Toast.makeText(getApplicationContext(), interestPoint.getName() + ": " + interestPoint.getDescription(), Toast.LENGTH_SHORT).show();
                 // showInterestPointPopup(interestpoint) un truc comme ça
                 return true;

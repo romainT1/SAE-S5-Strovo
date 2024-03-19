@@ -33,7 +33,7 @@ public class Parcours {
     private float speed;
 
     /** Distance parcourue en mètres. */
-    private float distance;
+    private double distance;
 
     /** Dénivelé du parcours. */
     private double elevation;
@@ -58,7 +58,7 @@ public class Parcours {
      * @param coordinates liste de coordonnées de points formant le parcours
      */
     public Parcours(String name, String description, Date date,
-                    long time, float speed, float distance, double elevation,
+                    long time, float speed, double distance, double elevation,
                     List<InterestPoint> interestPoints, List<double[]> coordinates) {
         this.name = name;
         this.description = description;
@@ -159,7 +159,7 @@ public class Parcours {
         this.speed = speed;
     }
 
-    public void setDistance(float distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 

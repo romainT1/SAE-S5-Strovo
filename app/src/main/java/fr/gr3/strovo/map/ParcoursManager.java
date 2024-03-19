@@ -73,7 +73,6 @@ public class ParcoursManager {
     public void start() {
         running = true;
         startTime = new Date().getTime();
-        // TODO intégrer le timer ICI
     }
 
     public void stop() {
@@ -89,12 +88,13 @@ public class ParcoursManager {
         // Si il y a plus d'une position enregistrée
         if (locations.size() > 1) {
             long time = endTime - startTime;
-            float distance = calculateDistance();
+            double distance = calculateDistance();
+            float speed = calculateSpeed(time, distance);
             double elevation = calculateElevation();
 
             parcours.setTime(time);
             parcours.setDistance(distance);
-            parcours.setSpeed(distance / time);
+            parcours.setSpeed(speed);
             parcours.setElevation(elevation);
         }
     }
@@ -111,6 +111,18 @@ public class ParcoursManager {
             distance += actual.distanceTo(next);
         }
         return distance;
+    }
+
+    /**
+     * Calcule la vitesst moyenne du parcours.
+     * @param time temps
+     * @return la vitesse en km/h
+     */
+    private float calculateSpeed(float time, double distance) {
+        float timeSeconds = time * 0.001f;
+        float metterPerSecondes = (float) (distance / timeSeconds);
+        float kilometerPerHour = (float) (metterPerSecondes / 3.6);
+        return 10;
     }
 
 

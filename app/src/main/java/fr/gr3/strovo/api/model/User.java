@@ -1,6 +1,9 @@
 package fr.gr3.strovo.api.model;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import fr.gr3.strovo.PasswordHasher;
 
 /** Représente un utilisateur. */
 public class User {
@@ -38,6 +41,10 @@ public class User {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getFirstname() {
         return firstname;
     }
@@ -46,4 +53,13 @@ public class User {
         return lastname;
     }
 
+    public JSONObject toJson() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("email", email);
+        jsonObject.put("password", password);
+        jsonObject.put("firstname", firstname);
+        jsonObject.put("lastname", lastname);
+
+        return jsonObject;
+    }
 }

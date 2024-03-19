@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 import java.security.NoSuchAlgorithmException;
 
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.User;
 
 /**
@@ -63,6 +65,7 @@ public class Inscription extends AppCompatActivity {
      * @param view vue
      */
     public void clicInscrire(View view) throws NoSuchAlgorithmException {
+
         // Récupération des informations de l'utilisateur
         User user = new User(email.getText().toString(), password.getText().toString(),
                 firstname.getText().toString(), lastname.getText().toString());
@@ -89,7 +92,12 @@ public class Inscription extends AppCompatActivity {
         }
         // Informations valide, inscription de l'utilisateur
         else {
-            inscription(user);
+            // Hash le mot de passe de l'utilisateur
+            String hashedPassword = PasswordHasher.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+
+            // Enregistre l'utilisateur à l'api
+            register(user);
         }
     }
 
@@ -111,41 +119,43 @@ public class Inscription extends AppCompatActivity {
      * une fois l'utilisateur enregistré.
      * @param user utilisateur à enregistrer
      */
-    private void inscription(User user) throws NoSuchAlgorithmException {
-        // Crée un objet JSON contenant les détails de l'utilisateur
-        JSONObject jsonObject = new JSONObject();
+    private void register(User user) {
         try {
-            jsonObject.put("email", user.getEmail());
-            jsonObject.put("password", PasswordHasher.hashPassword(user.getPassword()));
-            jsonObject.put("firstname", user.getFirstname());
-            jsonObject.put("lastname", user.getLastname());
+            JsonObjectRequest request = StrovoApi.getInstance().registerUser(user,
+                    onInscriptionSuccess(), onInscriptionError());
+            requestQueue.add(request);
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
-        // Crée une requête POST pour l'inscription à l'API
-        JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.POST, Endpoints.SIGNUP_URL, jsonObject,
-                response -> {
-                    // Affiche un toast pour indiquer que l'inscription a réussi
-                    Toast.makeText(this, "Compte créé avec succès !", Toast.LENGTH_LONG).show();
-                    finish(); // Termine l'activité inscription
-                },
-                error -> {
-                    String messageErreur = getString(R.string.err);
-
-                    // Si erreur liée à un problème de conflit
-                    if (error.networkResponse != null) {
-                        if (error.networkResponse.statusCode == 409) {
-                            messageErreur = getString(R.string.errInscriptionConflict);
-                        }
-                    }
-                    Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
-                    Log.d("Erreur inscription", error.getMessage());
-                }
-        );
-        // Ajoute la requête à la file d'attente des requêtes HTTP
-        requestQueue.add(request);
     }
 
+    /**
+     * Exécuté lorsque l'inscription de l'utilisateur est réussie.
+     * @return un objet Response.Listener
+     */
+    private Response.Listener onInscriptionSuccess() {
+        return response -> {
+            Toast.makeText(this, "Compte créé avec succès !", Toast.LENGTH_LONG).show();
+            finish(); // Termine l'activité inscription
+        };
+    }
+
+    /**
+     * Exécuté lorsque l'inscription de l'utilisateur en echec.
+     * @return un objet Response.ErrorListener
+     */
+    private Response.ErrorListener onInscriptionError() {
+        return error -> {
+            String messageErreur = getString(R.string.err);
+
+            // Si erreur liée à un problème de conflit
+            if (error.networkResponse != null) {
+                if (error.networkResponse.statusCode == 409) {
+                    messageErreur = getString(R.string.errInscriptionConflict);
+                }
+            }
+            Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
+            Log.d("Erreur inscription", error.getMessage());
+        };
+    }
 }
