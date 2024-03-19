@@ -11,9 +11,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -22,7 +22,6 @@ import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 
-import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.utils.Keys;
 
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         // Hash le mot de passe de l'utilisateur
         String hashedPassword = PasswordHasher.hashPassword(passwordValue);
 
-        connexion(emailValue, hashedPassword);
+        login(emailValue, hashedPassword);
     }
 
 
@@ -103,8 +102,9 @@ public class MainActivity extends AppCompatActivity {
      * @param email de l'utilisateur
      * @param password mot de passe de l'utilisateur
      */
-    private void connexion(String email, String password) {
-        JsonObjectRequest request = StrovoApi.getInstance().login(email, password, onLoginSuccess(), onLoginError());
+    private void login(String email, String password) {
+        JsonObjectRequest request = StrovoApi.getInstance().login(email, password,
+                this::onLoginSuccess, this::onLoginError);
 
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
         requestQueue.add(request);
@@ -112,37 +112,31 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Exécuté lorsque l'identification de l'utilisateur est réussie.
-     * @return un objet Response.Listener
      */
-    private Response.Listener<JSONObject> onLoginSuccess() {
-        return response -> {
-            try {
-                String token = response.getString("value");
-                // Enregistre le token dans les préférences
-                preferences.edit().putString(Keys.TOKEN_KEY, token).apply();
-                switchToAccueil(token);
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        };
+    private void onLoginSuccess(JSONObject response) {
+        try {
+            String token = response.getString("value");
+            // Enregistre le token dans les préférences
+            preferences.edit().putString(Keys.TOKEN_KEY, token).apply();
+            switchToAccueil(token);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Exécuté lorsque l'identification de l'utilisateur est en echec.
-     * @return un objet Response.ErrorListener
      */
-    private Response.ErrorListener onLoginError() {
-        return error -> {
-            int messageErreur = R.string.err;
+    private void onLoginError(VolleyError error) {
+        int messageErreur = R.string.err;
 
-            /* Si erreur liée à un problème de permission */
-            if (error.networkResponse != null ) {
-                if (error.networkResponse.statusCode == 403) {
-                    messageErreur = R.string.errConnexion;
-                }
+        /* Si erreur liée à un problème de permission */
+        if (error.networkResponse != null ) {
+            if (error.networkResponse.statusCode == 403) {
+                messageErreur = R.string.errConnexion;
             }
-            Toast.makeText(MainActivity.this, messageErreur, Toast.LENGTH_LONG).show();
-        };
+        }
+        Toast.makeText(MainActivity.this, messageErreur, Toast.LENGTH_LONG).show();
     }
 
 

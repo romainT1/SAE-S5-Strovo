@@ -156,7 +156,7 @@ public class Accueil extends AppCompatActivity {
      */
     private void getParcoursFromApi() {
         JsonArrayRequest request = StrovoApi.getInstance().getParcours(token,
-                onGetParcoursSuccess(), onGetParcoursError());
+                this::onGetParcoursSuccess, this::onGetParcoursError);
 
         // Ajoute la requête à la file d'attente
         requestQueue.add(request);
@@ -164,32 +164,26 @@ public class Accueil extends AppCompatActivity {
 
     /**
      * Exécuté lorsque la récupération des parcours est réussie.
-     * @return un objet Response.Listener
      */
-    private Response.Listener<JSONArray> onGetParcoursSuccess() {
-        return response -> {
-            parseJsonResponse(response);
+    private void onGetParcoursSuccess(JSONArray response) {
+        parseJsonResponse(response);
 
-            // Vérifie si la liste des parcours est vide
-            if (parcoursList.isEmpty()) {
-                emptyParcoursText.setVisibility(View.VISIBLE);
-            }
-        };
+        // Vérifie si la liste des parcours est vide
+        if (parcoursList.isEmpty()) {
+            emptyParcoursText.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
      * Exécuté lorsque la récupération des parcours est réussie.
-     * @return un objet Response.ErrorListener
      */
-    private Response.ErrorListener onGetParcoursError() {
-        return error -> {
-            // Si token de connexion invalide
-            if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
-                finish(); // Renvoie vers la page de connexion
-            } else {
-                emptyParcoursText.setVisibility(View.VISIBLE);
-            }
-        };
+    private void onGetParcoursError(VolleyError error) {
+        // Si token de connexion invalide
+        if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
+            finish(); // Renvoie vers la page de connexion
+        } else {
+            emptyParcoursText.setVisibility(View.VISIBLE);
+        }
     }
 
 
@@ -233,8 +227,8 @@ public class Accueil extends AppCompatActivity {
     public void deleteParcoursFromApi(Parcours parcours) {
 
         StringRequest request = StrovoApi.getInstance().deleteParcours(token, parcours.getId(),
-                response -> {adapter.remove(parcours);},
-                error -> {Log.e("DELETE Error", error.toString());});
+                response -> adapter.remove(parcours),
+                error -> Log.e("DELETE Error", error.toString()));
 
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
         requestQueue.add(request);
@@ -582,8 +576,8 @@ public class Accueil extends AppCompatActivity {
      */
     private void updateParcoursFromApi(Parcours parcours) {
         JsonObjectRequest request = StrovoApi.getInstance().updateParcours(token, parcours,
-                response -> {showError("Description modifiée");},
-                error -> {Log.e("UPDATE Error", error.toString());}
+                response -> showError("Description modifiée"),
+                error -> Log.e("UPDATE Error", error.toString())
         );
 
         // Ajoute la requête de mise à jour à la file d'attente des requêtes HTTP

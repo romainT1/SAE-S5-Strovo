@@ -28,8 +28,6 @@ import org.osmdroid.views.overlay.Polyline;
 
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.map.InterestPoint;
 import fr.gr3.strovo.utils.Keys;
@@ -154,7 +153,7 @@ public class CourseSynthese extends AppCompatActivity {
             }
         });
 
-        findParcoursFromApi(parcoursId);
+        getParcoursByIdFromApi(parcoursId);
     }
 
     /**
@@ -231,42 +230,31 @@ public class CourseSynthese extends AppCompatActivity {
      * Les détails du parcours récupérés sont utilisés pour afficher les informations sur l'interface graphique.
      * @param parcoursId l'identifiant du parcours à récupérer
      */
-    private void findParcoursFromApi(String parcoursId) {
-        String apiUrl = String.format(Endpoints.GET_PARCOURS_BY_ID, parcoursId);
-
-        // Créer une nouvelle demande GET à l'aide de Volley
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, apiUrl, null, response -> {
-
-                    try {
-                        // Créé un nouvel objet Parcours avec les données extraites
-                        Parcours parcours = fetchParcours(response);
-
-                        // Charge les éléments graphiques de la synthèse
-                        chargerParcours(parcours);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(CourseSynthese.this, R.string.errRecupInfosParcours, Toast.LENGTH_LONG).show();
-                    }
-                })
-        {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", token);
-                return headers;
-            }
-        };
+    private void getParcoursByIdFromApi(String parcoursId) {
+        JsonObjectRequest request = StrovoApi.getInstance().getParcoursById(token, parcoursId,
+                this::onGetParcoursByIdSuccess,
+                error -> showError(getString(R.string.errRecupInfosParcours))
+        );
 
         // Ajouter la demande à la file d'attente de Volley pour l'exécuter
-        requestQueue.add(jsonObjectRequest);
+        requestQueue.add(request);
+    }
+
+    /**
+     * Exécuté lorsque la récupération du parcours est réussie.
+     */
+    private void onGetParcoursByIdSuccess(JSONObject response) {
+        try {
+            // Créé un nouvel objet Parcours avec les données extraites
+            Parcours parcours = fetchParcours(response);
+
+            // Charge les éléments graphiques de la synthèse
+            chargerParcours(parcours);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -372,5 +360,10 @@ public class CourseSynthese extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         map.onPause();
+    }
+
+    /** Crée un toast pour afficher l'erreur. */
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
