@@ -5,28 +5,25 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-
 import androidx.appcompat.app.AppCompatActivity;
-
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
-
 import org.json.JSONException;
-
+import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 
-
 import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.utils.Keys;
 
 
@@ -81,7 +78,11 @@ public class MainActivity extends AppCompatActivity {
     public void clicConnexion(View view) throws NoSuchAlgorithmException {
         String emailValue = email.getText().toString();
         String passwordValue = motDePasse.getText().toString();
-        connexion(emailValue, passwordValue);
+
+        // Hash le mot de passe de l'utilisateur
+        String hashedPassword = PasswordHasher.hashPassword(passwordValue);
+
+        connexion(emailValue, hashedPassword);
     }
 
 
@@ -98,39 +99,50 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     * Envoie une requête de connexion à l'API et enregistre le token reçu
-     * dans les préférences.
-     * @param email
-     * @param password
+     * Envoie une requête de connexion à l'API et enregistre le token reçu dans les préférences.
+     * @param email de l'utilisateur
+     * @param password mot de passe de l'utilisateur
      */
-    private void connexion(String email, String password) throws NoSuchAlgorithmException {
-        String apiUrl = String.format(Endpoints.LOGIN_URL, email, PasswordHasher.hashPassword(password));
+    private void connexion(String email, String password) {
+        JsonObjectRequest request = StrovoApi.getInstance().login(email, password, onLoginSuccess(), onLoginError());
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, apiUrl, null,
-                response -> {
-                    try {
-                        String token = response.getString("value");
-                        // Enregistre le token dans les préférences
-                        preferences.edit().putString(Keys.TOKEN_KEY, token).apply();
-                        switchToAccueil(token);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                },
-                error -> {
-                    int messageErreur = R.string.err;
-
-                    /* Si erreur liée à un problème de permission */
-                    if (error.networkResponse != null ) {
-                        if (error.networkResponse.statusCode == 403) {
-                            messageErreur = R.string.errConnexion;
-                        }
-                    }
-                    Toast.makeText(MainActivity.this, messageErreur, Toast.LENGTH_LONG).show();
-                });
         // Ajoute la requête de suppression à la file d'attente des requêtes HTTP
-        requestQueue.add(jsonObjectRequest);
+        requestQueue.add(request);
+    }
+
+    /**
+     * Exécuté lorsque l'identification de l'utilisateur est réussie.
+     * @return un objet Response.Listener
+     */
+    private Response.Listener<JSONObject> onLoginSuccess() {
+        return response -> {
+            try {
+                String token = response.getString("value");
+                // Enregistre le token dans les préférences
+                preferences.edit().putString(Keys.TOKEN_KEY, token).apply();
+                switchToAccueil(token);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    }
+
+    /**
+     * Exécuté lorsque l'identification de l'utilisateur est en echec.
+     * @return un objet Response.ErrorListener
+     */
+    private Response.ErrorListener onLoginError() {
+        return error -> {
+            int messageErreur = R.string.err;
+
+            /* Si erreur liée à un problème de permission */
+            if (error.networkResponse != null ) {
+                if (error.networkResponse.statusCode == 403) {
+                    messageErreur = R.string.errConnexion;
+                }
+            }
+            Toast.makeText(MainActivity.this, messageErreur, Toast.LENGTH_LONG).show();
+        };
     }
 
 

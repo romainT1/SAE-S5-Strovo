@@ -14,6 +14,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -57,6 +58,12 @@ public class Inscription extends AppCompatActivity {
         requestQueue = Volley.newRequestQueue(this);
     }
 
+    /** Crée un toast pour afficher l'erreur. */
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+
     /**
      * Exécuté quand l'utilisateur clique sur le bouton d'inscription.
      * @param view vue
@@ -98,11 +105,6 @@ public class Inscription extends AppCompatActivity {
         }
     }
 
-    /** Crée un toast pour afficher l'erreur. */
-    private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
     /**
      * Exécuté quand l'utilisateur clique sur le bouton retour.
      * @param view
@@ -119,10 +121,10 @@ public class Inscription extends AppCompatActivity {
     private void register(User user) {
         try {
             JsonObjectRequest request = StrovoApi.getInstance().registerUser(user,
-                    onInscriptionSuccess(), onInscriptionError());
+                    onRegisterSuccess(), onRegisterError());
             requestQueue.add(request);
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            showError("Une erreur s'est produite lors de l'inscription");
         }
     }
 
@@ -130,9 +132,9 @@ public class Inscription extends AppCompatActivity {
      * Exécuté lorsque l'inscription de l'utilisateur est réussie.
      * @return un objet Response.Listener
      */
-    private Response.Listener onInscriptionSuccess() {
+    private Response.Listener<JSONObject> onRegisterSuccess() {
         return response -> {
-            Toast.makeText(this, "Compte créé avec succès !", Toast.LENGTH_LONG).show();
+            showError("Compte créé avec succès !");
             finish(); // Termine l'activité inscription
         };
     }
@@ -141,7 +143,7 @@ public class Inscription extends AppCompatActivity {
      * Exécuté lorsque l'inscription de l'utilisateur en echec.
      * @return un objet Response.ErrorListener
      */
-    private Response.ErrorListener onInscriptionError() {
+    private Response.ErrorListener onRegisterError() {
         return error -> {
             String messageErreur = getString(R.string.err);
 
@@ -150,8 +152,7 @@ public class Inscription extends AppCompatActivity {
                 && error.networkResponse.statusCode == 409) {
                     messageErreur = getString(R.string.errInscriptionConflict);
             }
-            Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
-            Log.d("Erreur inscription", error.getMessage());
+            showError(messageErreur);
         };
     }
 }
