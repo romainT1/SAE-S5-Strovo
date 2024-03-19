@@ -1,12 +1,19 @@
 package fr.gr3.strovo;
 
+
+
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.SearchView;
 
+
+import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.Parcours;
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -15,15 +22,24 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.app.Dialog;
 import android.widget.TextView;
+import android.widget.Toast;
+
+
+
 
 import androidx.appcompat.app.AppCompatActivity;
+
+
+
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -35,9 +51,15 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+
+
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
+
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -52,9 +74,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
+
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.map.CourseActivity;
+import fr.gr3.strovo.map.InterestPoint;
 import fr.gr3.strovo.utils.Keys;
+
+
 
 
 /**
@@ -113,19 +141,30 @@ public class Accueil extends AppCompatActivity {
     private ParcoursAdapter adapter;
 
 
+
+
     /** Nom du parcours */
     private String nameParcours;
+
+
 
 
     /** Intervalle des dates des parcours */
     private Date[] dateIntervalle;
 
+
+
+
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;
 
 
+
+
     /** Handler pour gérer le délai d'appel à l'API */
     private Handler handler = new Handler();
+
+
 
 
     /** Pour gérer le délai de l'appel à l'API */
@@ -188,8 +227,15 @@ public class Accueil extends AppCompatActivity {
         }
     }
 
+
+
+
+    /**
+     * Récupère les données des parcours depuis l'API en utilisant la bibliothèque Volley.
+     */
     private void getParcoursFromApi() {
-        JsonArrayRequest request = StrovoApi.getInstance().getParcours(token, onGetParcoursSuccess(), onGetParcoursError());
+        JsonArrayRequest request = StrovoApi.getInstance().getParcours(token, onGetParcoursSuccess(),
+                onGetParcoursError());
 
         // Ajoute la requête à la file d'attente
         requestQueue.add(request);
@@ -224,7 +270,6 @@ public class Accueil extends AppCompatActivity {
             }
         };
     }
-
 
 
 
@@ -383,6 +428,8 @@ public class Accueil extends AppCompatActivity {
         searchBarListener();
 
 
+
+
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
     }
@@ -450,17 +497,6 @@ public class Accueil extends AppCompatActivity {
                         if (parcours.getName().toLowerCase().contains(newText.toLowerCase())) {
                             filteredList.add(parcours);
                         }
-
-                // Supprimer les appels en attente
-                handler.removeCallbacks(runnable);
-
-
-                // Définir un délai avant l'appel à l'API
-                runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        String rechercheNomParcours = newText.replace(" ", "+");
-                        getParcoursFromApi();
                     }
                 }
                 // Mettre à jour l'adaptateur avec la liste filtrée
@@ -883,4 +919,8 @@ public class Accueil extends AppCompatActivity {
             // En cas d'erreur de l'API, cette méthode est appelée
         });
     }
+
+
+
+
 }
