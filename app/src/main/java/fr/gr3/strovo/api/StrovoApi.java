@@ -7,7 +7,25 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import fr.gr3.strovo.api.model.User;
 
+/**
+ * Classe permettant de communiquer avec l'api
+ */
 public class StrovoApi {
+
+    /** URL de l'api strovo */
+    private static final String API_URL = "http://158.178.195.92:8080";
+
+    /** Point de terminaison pour l'enregistrement d'un utilisateur  */
+    public static final String SIGNUP_URL = API_URL + "/user/signup";
+
+    /** Point de terminaison pour l'identification d'un utilisateur  */
+    public static final String LOGIN_URL = API_URL + "/user/login?email=%s&password=%s";
+    public static final String GET_PARCOURS = API_URL + "/parcours";
+    public static final String ADD_PARCOURS = API_URL + "/parcours";
+    public static final String DELETE_PARCOURS = API_URL + "/parcours/%s";
+    public static final String GET_PARCOURS_BY_ID = API_URL + "/parcours/%s";
+    public static final String UPDATE_PARCOURS = API_URL + "/parcours/%s" ;
+
 
     /** Singleton */
     private static StrovoApi instance;
@@ -39,7 +57,7 @@ public class StrovoApi {
     public JsonObjectRequest registerUser(User user, Response.Listener responseListener,
                                           Response.ErrorListener errorListener) throws JSONException {
 
-        return new JsonObjectRequest(Request.Method.POST, Endpoints.SIGNUP_URL, user.toJson(),
+        return new JsonObjectRequest(Request.Method.POST, SIGNUP_URL, user.toJson(),
                         responseListener, errorListener);
     }
 
@@ -54,7 +72,7 @@ public class StrovoApi {
     public JsonObjectRequest login(String email, String password, Response.Listener responseListener,
                                    Response.ErrorListener errorListener) {
 
-        String apiUrl = String.format(Endpoints.LOGIN_URL, email, password);
+        String apiUrl = String.format(LOGIN_URL, email, password);
 
         return new JsonObjectRequest(Request.Method.GET, apiUrl, null,
                 responseListener, errorListener);
