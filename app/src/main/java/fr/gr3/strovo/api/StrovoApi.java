@@ -1,10 +1,16 @@
 package fr.gr3.strovo.api;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import fr.gr3.strovo.api.model.User;
 
 /**
@@ -47,7 +53,7 @@ public class StrovoApi {
     }
 
     /**
-     * Construit un requête pour enregistrer un utilisateur.
+     * Construit une requête pour enregistrer un utilisateur.
      * @param user utilisateur à enregistrer
      * @param responseListener Response.Listener exécuté en cas de succès
      * @param errorListener Response.ErrorListener exécuté en cas d'échec
@@ -62,7 +68,7 @@ public class StrovoApi {
     }
 
     /**
-     * Construit un requête pour identifier un utilisateur.
+     * Construit une requête pour identifier un utilisateur.
      * @param email adresse mail de l'utilisateur
      * @param password mot de passe de l'utilisateur
      * @param responseListener Response.Listener exécuté en cas de succès
@@ -76,5 +82,26 @@ public class StrovoApi {
 
         return new JsonObjectRequest(Request.Method.GET, apiUrl, null,
                 responseListener, errorListener);
+    }
+
+    /**
+     * Construit une requête pour récupérer la listes des parcours d'un utilisateur
+     * @param token jeton de connexion de l'utilisateur
+     * @param responseListener Response.Listener exécuté en cas de succès
+     * @param errorListener Response.ErrorListener exécuté en cas d'échec
+     * @return un requête de récupération des parcours de l'utilisateur
+     */
+    public JsonArrayRequest getParcours(String token, Response.Listener responseListener,
+                                 Response.ErrorListener errorListener) {
+
+        return new JsonArrayRequest(Request.Method.GET, GET_PARCOURS, null,
+                responseListener, errorListener) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", token);
+                return headers;
+            }
+        };
     }
 }
