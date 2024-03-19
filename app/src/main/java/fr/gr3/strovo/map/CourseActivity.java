@@ -43,6 +43,11 @@ import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -200,14 +205,38 @@ public class CourseActivity extends AppCompatActivity {
      * Méthode exécutée lorsque l'utilisateur clique sur le bouton d'arrêt du parcours.
      */
     public void clicStopParcours(View view) {
-        // TODO Sauvegarder parcours
         parcoursManager.stop();
         Parcours parcours = parcoursManager.getParcours();
         locationListener = null;
         locationManager = null;
-        addParcoursToApi();
+        try{
+            addParcoursToApi();
+        } catch (Exception exception) {
+            FileOutputStream fichier = null;
+            try {
+                fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
+
+                JSONObject jsonParcours = new JSONObject();
+                jsonParcours.put("name", parcours.getName());
+                jsonParcours.put("description", parcours.getDescription());
+                jsonParcours.put("date", parcours.getDate());
+                jsonParcours.put("time", parcours.getTime());
+                jsonParcours.put("speed", parcours.getSpeed());
+                jsonParcours.put("distance", parcours.getDistance());
+                jsonParcours.put("elevation", parcours.getElevation());
+                jsonParcours.put("interestPoints", parcours.getInterestPoints());
+                jsonParcours.put("coordinates", parcours.getCoordinates());
+
+                fichier.write(jsonParcours.toString().getBytes());
+                fichier.close();
+                switchToAccueil(parcours.getId());
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+        }
         // TODO arreter le traceur
-        // TODO envoyer parcours sur synthese
     }
 
     /** Initialise l'écouteur de localisation de l'utilisateur.
