@@ -149,10 +149,9 @@ public class Inscription extends AppCompatActivity {
             String messageErreur = getString(R.string.err);
 
             // Si erreur liée à un problème de conflit
-            if (error.networkResponse != null) {
-                if (error.networkResponse.statusCode == 409) {
+            if (error.networkResponse != null
+                && error.networkResponse.statusCode == 409) {
                     messageErreur = getString(R.string.errInscriptionConflict);
-                }
             }
             Toast.makeText(this, messageErreur, Toast.LENGTH_LONG).show();
             Log.d("Erreur inscription", error.getMessage());
