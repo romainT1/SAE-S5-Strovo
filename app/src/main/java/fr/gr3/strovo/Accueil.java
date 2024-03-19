@@ -165,8 +165,7 @@ public class Accueil extends AppCompatActivity {
 
         try {
             unsentFiles();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (FileNotFoundException ignored) {
         } catch (Exception ignored) {
 
         }
@@ -743,6 +742,7 @@ public class Accueil extends AppCompatActivity {
     }
 
     private void unsentFiles() throws FileNotFoundException {
+
         InputStreamReader fichier =
                 new InputStreamReader(openFileInput("parcoursTemp"));
         BufferedReader fichierTexte = new BufferedReader(fichier);
