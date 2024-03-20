@@ -269,7 +269,7 @@ public class CourseSynthese extends AppCompatActivity {
         String description = response.isNull("description") ? null : response.getString("description");
         Date date = response.isNull("date") ? null : formatter.parse(response.getString("date"));
         long time = response.isNull("time") ? 0 : response.getLong("time");
-        float averageSpeed = response.isNull("averageSpeed") ? 0 : (float) response.getDouble("averageSpeed");
+        float averageSpeed = response.isNull("speed") ? 0 : (float) response.getDouble("speed");
         float distance = response.isNull("distance") ? 0 : (float) response.getDouble("distance");
         double elevation = response.isNull("elevation") ? 0 : response.getDouble("elevation");
 
