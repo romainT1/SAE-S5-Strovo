@@ -5,6 +5,7 @@
     <string name="filtres">Filtres</string>
     <string name="enregistrerParcours">Enregistrer un parcours</string>
     <string name="aucunParcours">Aucun parcours trouvé.</string>
+    <string name="errParcoursNameEmpty">Veuillez saisir un nom pour le parcours.</string>
 
     <!-- Connexion / Inscription  -->
     <string name="email">Email</string>
@@ -52,6 +53,7 @@
     <string name="inputDescription">Description</string>
     <string name="ajouterPointInteret">Ajouter un point d\'interet</string>
     <string name="arreter">Arreter</string>
+    <string name="errPointNameEmpty">Veuillez saisir un nom pour le point d\'intêret.</string>
 
     <!-- Popup permissions-->
     <string name="titrePopupPermissions">Autorisations nécessaires</string>

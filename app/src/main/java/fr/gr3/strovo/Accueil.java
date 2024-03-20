@@ -663,8 +663,12 @@ public class Accueil extends AppCompatActivity {
 
         // Gère le clic sur le bouton "Confirmer"
         confirmer.setOnClickListener(view -> {
-            switchToCourse(token, inputName.getText().toString(), inputCommentaire.getText().toString());
-            dialog.dismiss();
+            if (!inputName.getText().toString().isEmpty()) {
+                switchToCourse(token, inputName.getText().toString(), inputCommentaire.getText().toString());
+                dialog.dismiss();
+            } else {
+                showError(getString(R.string.errParcoursNameEmpty));
+            }
         });
 
 

@@ -402,21 +402,24 @@ public class CourseActivity extends AppCompatActivity {
 
         // Quand l'utilisateur clique sur "Confirmer"
         confirmer.setOnClickListener(v -> {
-            // TODO vérifier que l'input libelle est bien défini
             // Vérification les permissions
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO afficher une popup ?
                 return;
             }
 
-            // Ajoute un point d'intérêt sur la position actuelle de l'utilisateur
-            Location currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            GeoPoint point = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
-            InterestPoint interestPoint = new InterestPoint(point,
-                    inputLibelle.getText().toString(), inputDescription.getText().toString());
-            addInterestPoint(interestPoint);
+            if (!inputLibelle.getText().toString().isEmpty()) {
+                // Ajoute un point d'intérêt sur la position actuelle de l'utilisateur
+                Location currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                GeoPoint point = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+                InterestPoint interestPoint = new InterestPoint(point,
+                        inputLibelle.getText().toString(), inputDescription.getText().toString());
+                addInterestPoint(interestPoint);
 
-            dialog.dismiss();
+                dialog.dismiss();
+            } else {
+                showError(getString(R.string.errPointNameEmpty));
+            }
         });
 
         // Quand l'utilisateur clique sur "Annuler"
