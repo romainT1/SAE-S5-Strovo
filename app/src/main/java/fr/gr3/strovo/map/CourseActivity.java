@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -207,36 +208,15 @@ public class CourseActivity extends AppCompatActivity {
      */
     public void clicStopParcours(View view) {
         parcoursManager.stop();
-        Parcours parcours = parcoursManager.getParcours();
+
         locationListener = null;
         locationManager = null;
-        try{
+        try {
             addParcoursToApi();
-        } catch (Exception exception) {
-            FileOutputStream fichier = null;
-            try {
-                fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
+        } catch (JSONException ignore) {
 
-                JSONObject jsonParcours = new JSONObject();
-                jsonParcours.put("name", parcours.getName());
-                jsonParcours.put("description", parcours.getDescription());
-                jsonParcours.put("date", parcours.getDate());
-                jsonParcours.put("time", parcours.getTime());
-                jsonParcours.put("speed", parcours.getSpeed());
-                jsonParcours.put("distance", parcours.getDistance());
-                jsonParcours.put("elevation", parcours.getElevation());
-                jsonParcours.put("interestPoints", parcours.getInterestPoints());
-                jsonParcours.put("coordinates", parcours.getCoordinates());
-
-                fichier.write(jsonParcours.toString().getBytes());
-                fichier.close();
-                switchToAccueil(parcours.getId());
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
         }
+
         // TODO arreter le traceur
     }
 
@@ -433,10 +413,11 @@ public class CourseActivity extends AppCompatActivity {
      */
 
     public void addParcoursToApi() throws JSONException {
-
+        FileOutputStream fichier = null;
+        Parcours parcours = parcoursManager.getParcours();
         JsonObjectRequest request = StrovoApi.getInstance().addParcours(token, parcoursManager.getParcours(),
                 this::onAddParcoursSuccess,
-                error -> showError("Impossible d'enregistrer le parcours")
+                error -> saveInFile()
         );
         // Ajoute la requête à la file d'attente des requêtes HTTP
         requestQueue.add(request);
@@ -470,5 +451,32 @@ public class CourseActivity extends AppCompatActivity {
     /** Crée un toast pour afficher l'erreur. */
     private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private void saveInFile(){
+        try {
+            OutputStream fichier = null;
+            Parcours parcours = parcoursManager.getParcours();
+            fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
+
+            JSONObject jsonParcours = new JSONObject();
+            jsonParcours.put("name", parcours.getName());
+            jsonParcours.put("description", parcours.getDescription());
+            jsonParcours.put("date", parcours.getDate());
+            jsonParcours.put("time", parcours.getTime());
+            jsonParcours.put("speed", parcours.getSpeed());
+            jsonParcours.put("distance", parcours.getDistance());
+            jsonParcours.put("elevation", parcours.getElevation());
+            jsonParcours.put("interestPoints", parcours.getInterestPoints());
+            jsonParcours.put("coordinates", parcours.getCoordinates());
+
+            fichier.write(jsonParcours.toString().getBytes());
+            fichier.close();
+            switchToAccueil(parcours.getId());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
