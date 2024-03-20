@@ -376,7 +376,7 @@ public class CourseActivity extends AppCompatActivity {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
                 Toast.makeText(getApplicationContext(), interestPoint.getName() + ": " + interestPoint.getDescription(), Toast.LENGTH_SHORT).show();
-                // showInterestPointPopup(interestpoint) un truc comme ça
+                // TODO showInterestPointPopup(interestpoint) un truc comme ça
                 return true;
             }
         });

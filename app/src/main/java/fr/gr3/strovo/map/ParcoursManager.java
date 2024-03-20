@@ -119,10 +119,8 @@ public class ParcoursManager {
      * @return la vitesse en km/h
      */
     private float calculateSpeed(float time, double distance) {
-        float timeSeconds = time * 0.001f;
-        float metterPerSecondes = (float) (distance / timeSeconds);
-        float kilometerPerHour = (float) (metterPerSecondes / 3.6);
-        return 10;
+        float timeHour = time / 1000 / 3600;
+        return (float) (distance / 1000 / timeHour);
     }
 
 
