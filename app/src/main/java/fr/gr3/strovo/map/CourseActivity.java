@@ -458,6 +458,7 @@ public class CourseActivity extends AppCompatActivity {
             OutputStream fichier = null;
             Parcours parcours = parcoursManager.getParcours();
             fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
+            Log.d("CourseActivity", "Sauvegarde du parcours en cours...");
 
             JSONObject jsonParcours = new JSONObject();
             jsonParcours.put("name", parcours.getName());
@@ -472,11 +473,13 @@ public class CourseActivity extends AppCompatActivity {
 
             fichier.write(jsonParcours.toString().getBytes());
             fichier.close();
+            // Log pour confirmer la sauvegarde
+            Log.d("CourseActivity", "Parcours sauvegardé avec succès.");
             switchToAccueil(parcours.getId());
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            Log.e("CourseActivity", "Fichier non trouvé pour la sauvegarde", e);
         } catch (IOException | JSONException e) {
-            e.printStackTrace();
+            Log.e("CourseActivity", "Erreur lors de la sauvegarde du parcours", e);
         }
     }
 }

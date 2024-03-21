@@ -451,10 +451,6 @@ public class Accueil extends AppCompatActivity {
                 /* Lorsque l'utilisateur clique sur "Rechercher", récupère les dates
                  * sélectionnées et lance la recherche
                  */
-
-
-
-
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
                 try {
                     Date dateMin = simpleDateFormat.parse(inputDateMin.getText().toString());
@@ -737,21 +733,23 @@ public class Accueil extends AppCompatActivity {
 
 
     private void unsentFiles() throws FileNotFoundException {
-
-
-        InputStreamReader fichier =
-                new InputStreamReader(openFileInput("parcoursTemp"));
+        InputStreamReader fichier = new InputStreamReader(openFileInput("parcoursTemp"));
         BufferedReader fichierTexte = new BufferedReader(fichier);
         String ligne;
         try {
+            // Log pour confirmer le début de la lecture du fichier
+            Log.d("Accueil", "Début de la lecture du fichier des parcours non envoyés.");
             while ((ligne = fichierTexte.readLine()) != null) {
-                // Créer un JSONObject à partir de la ligne
+                // Log pour afficher la ligne lue
+                Log.d("Accueil", "Ligne lue: " + ligne);
                 JSONObject jsonParcours = new JSONObject(ligne);
                 sendToApi(jsonParcours);
             }
             deleteFile("parcoursTemp");
+            // Log pour confirmer la fin de la lecture et l'envoi des parcours
+            Log.d("Accueil", "Tous les parcours non envoyés ont été traités.");
         } catch (JSONException | IOException e) {
-            e.printStackTrace();
+            Log.e("Accueil", "Erreur lors de la lecture ou de l'envoi des parcours non envoyés", e);
         }
     }
 
@@ -759,11 +757,14 @@ public class Accueil extends AppCompatActivity {
     private void sendToApi(JSONObject jsonParcours) {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
                 response -> {
-
-
+                    // Log pour confirmer le succès de l'envoi
+                    Log.d("Accueil", "Parcours envoyé avec succès à l'API.");
                 }, error -> {
-            // En cas d'erreur de l'API, cette méthode est appelée
+            // Log en cas d'erreur de l'API
+            Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
         });
+
+        requestQueue.add(request);
     }
 
 
