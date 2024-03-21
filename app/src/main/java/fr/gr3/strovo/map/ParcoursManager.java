@@ -120,7 +120,7 @@ public class ParcoursManager {
      */
     private float calculateSpeed(float time, double distance) {
         float timeHour = time / 1000 / 3600;
-        return (float) (distance / 1000 / timeHour);
+        return (float) (distance / 1000 / timeHour); 
     }
 
 

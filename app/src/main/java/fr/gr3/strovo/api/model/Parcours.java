@@ -135,12 +135,8 @@ public class Parcours {
         this.description = description;
     }
 
-    public String getDate() {
-        // Formater la date dans le format souhaité
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        String formattedDate = sdf.format(date);
-
-        return formattedDate;
+    public Date getDate() {
+        return date;
     }
 
     public long getTime() {
