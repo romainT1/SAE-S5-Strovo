@@ -76,7 +76,7 @@ public class ParcoursAdapter extends ArrayAdapter<Parcours> {
         }
         // on place dans les 2 TextView les valeurs de l'item à afficher
         sauve.nomParcours.setText(parcours.getName());
-        sauve.dateHeure.setText(parcours.getDate());
+        sauve.dateHeure.setText(parcours.getDate().toString());
         return uneVue;
     }
 }

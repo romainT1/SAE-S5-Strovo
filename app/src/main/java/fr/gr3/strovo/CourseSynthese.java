@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import fr.gr3.strovo.api.Endpoints;
@@ -317,7 +318,10 @@ public class CourseSynthese extends AppCompatActivity {
         // Affiche les informations associés au parcours
         parcoursName.setText(parcours.getName());
         parcoursDescription.setText(parcours.getDescription());
-        parcoursDate.setText(parcours.getDate());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        String formattedDate = sdf.format(parcours.getDate());
+        parcoursDate.setText(formattedDate);
         int distance = parcours.getDistance();
         String resDistance;
         if (distance > 1000) {
