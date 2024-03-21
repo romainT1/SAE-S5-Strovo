@@ -44,6 +44,7 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -458,6 +459,8 @@ public class CourseActivity extends AppCompatActivity {
             OutputStream fichier = null;
             Parcours parcours = parcoursManager.getParcours();
             fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
+            File file = getFileStreamPath("parcoursTemp");
+            Log.d("CourseActivity", "Exists : " + file.exists());
             Log.d("CourseActivity", "Sauvegarde du parcours en cours...");
 
             JSONObject jsonParcours = new JSONObject();

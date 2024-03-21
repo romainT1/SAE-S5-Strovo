@@ -651,9 +651,9 @@ public class Accueil extends AppCompatActivity {
                 JSONObject jsonParcours = new JSONObject(ligne);
                 sendToApi(jsonParcours);
             }
-            deleteFile("parcoursTemp");
             // Log pour confirmer la fin de la lecture et l'envoi des parcours
             Log.d("Accueil", "Tous les parcours non envoyés ont été traités.");
+            deleteFile("parcoursTemp");
         } catch (JSONException | IOException e) {
             Log.e("Accueil", "Erreur lors de la lecture ou de l'envoi des parcours non envoyés", e);
         }
