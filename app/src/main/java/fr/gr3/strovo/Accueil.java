@@ -160,6 +160,7 @@ public class Accueil extends AppCompatActivity {
     }
 
 
+
     /**
      * Récupère les données des parcours depuis l'API en utilisant la bibliothèque Volley.
      */
@@ -301,6 +302,7 @@ public class Accueil extends AppCompatActivity {
             clickSaveParcours(lancerParcoursButton);
         }
     };
+
 
 
 
@@ -636,7 +638,6 @@ public class Accueil extends AppCompatActivity {
     }
 
 
-
     private List<JSONObject> parcoursList2 = new ArrayList<>();
 
     private void loadParcoursFromFile() {
@@ -662,8 +663,6 @@ public class Accueil extends AppCompatActivity {
             Log.e("Accueil", "Erreur lors de la lecture du fichier des parcours", e);
         }
     }
-
-
 
     private void sendParcoursToApi() {
         for (int i = 0; i < parcoursList.size(); i++) {
