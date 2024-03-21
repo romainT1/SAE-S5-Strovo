@@ -660,7 +660,6 @@ public class Accueil extends AppCompatActivity {
         for (int i = 0; i < parcoursList2.size(); i++) {
             final int index = i;
             JSONObject jsonParcours = parcoursList2.get(i);
-
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
                     response -> {
                         // Parcours envoyé avec succès, le retirer de la liste
@@ -673,10 +672,22 @@ public class Accueil extends AppCompatActivity {
                     }, error -> {
                 Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
                 // Gestion des erreurs d'envoi ici (par exemple, réessayer plus tard)
-            });
+            }) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    return createAuthorizationHeader(token);
+                }
+            };
+
 
             requestQueue.add(request);
         }
+    }
+
+    public Map<String, String> createAuthorizationHeader(String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", token);
+        return headers;
     }
 
     private boolean isNetworkAvailable() {

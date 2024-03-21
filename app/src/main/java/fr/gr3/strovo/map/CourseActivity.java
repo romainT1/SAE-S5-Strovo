@@ -460,16 +460,7 @@ public class CourseActivity extends AppCompatActivity {
             fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
             Log.d("CourseActivity", "Sauvegarde du parcours en cours...");
 
-            JSONObject jsonParcours = new JSONObject();
-            jsonParcours.put("name", parcours.getName());
-            jsonParcours.put("description", parcours.getDescription());
-            jsonParcours.put("date", parcours.getDate());
-            jsonParcours.put("time", parcours.getTime());
-            jsonParcours.put("speed", parcours.getSpeed());
-            jsonParcours.put("distance", parcours.getDistance());
-            jsonParcours.put("elevation", parcours.getElevation());
-            jsonParcours.put("interestPoints", parcours.getInterestPoints());
-            jsonParcours.put("coordinates", parcours.getCoordinates());
+            JSONObject jsonParcours = parcours.toJson();
 
             fichier.write(jsonParcours.toString().getBytes());
             fichier.close();
