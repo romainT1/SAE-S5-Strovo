@@ -459,8 +459,6 @@ public class CourseActivity extends AppCompatActivity {
             OutputStream fichier = null;
             Parcours parcours = parcoursManager.getParcours();
             fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
-            File file = getFileStreamPath("parcoursTemp");
-            Log.d("CourseActivity", "Exists : " + file.exists());
             Log.d("CourseActivity", "Sauvegarde du parcours en cours...");
 
             JSONObject jsonParcours = new JSONObject();

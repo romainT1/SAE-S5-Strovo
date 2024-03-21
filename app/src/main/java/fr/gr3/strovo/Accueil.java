@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -39,6 +42,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -140,26 +145,19 @@ public class Accueil extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 this::couseActivityDone);
 
-        try {
-            unsentFiles();
-        } catch (FileNotFoundException ignored) {
-        } catch (Exception ignored) {
-
-        }
+        onResume();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            unsentFiles();
-        } catch (Exception e) {
-            Log.e("Accueil", "Erreur lors de l'appel à unsentFiles", e);
+        if (isNetworkAvailable()) {
+            loadParcoursFromFile();
+            sendParcoursToApi();
         }
         // Appelle la méthode pour récupérer les données de l'API
         getParcoursFromApi();
     }
-
 
 
     /**
@@ -637,46 +635,70 @@ public class Accueil extends AppCompatActivity {
         startActivity(intention);
     }
 
-    private void unsentFiles() throws FileNotFoundException {
-        Log.d("Accueil", "Appel de unsentFiles()");
-        InputStreamReader fichier = new InputStreamReader(openFileInput("parcoursTemp"));
-        BufferedReader fichierTexte = new BufferedReader(fichier);
-        String ligne;
+
+
+    private List<JSONObject> parcoursList2 = new ArrayList<>();
+
+    private void loadParcoursFromFile() {
+
         try {
-            // Log pour confirmer le début de la lecture du fichier
-            Log.d("Accueil", "Début de la lecture du fichier des parcours non envoyés.");
-            while ((ligne = fichierTexte.readLine()) != null) {
-                // Log pour afficher la ligne lue
-                Log.d("Accueil", "Ligne lue: " + ligne);
-                JSONObject jsonParcours = new JSONObject(ligne);
-                sendToApi(jsonParcours);
+            FileInputStream fis = openFileInput("parcoursTemp");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+            String ligne;
+            while ((ligne = reader.readLine()) != null) {
+                try {
+                    JSONObject jsonParcours = new JSONObject(ligne);
+                    parcoursList2.add(jsonParcours);
+                } catch (JSONException e) {
+                    Log.e("Accueil", "Erreur lors de la conversion de la ligne en JSONObject", e);
+                }
             }
-            // Log pour confirmer la fin de la lecture et l'envoi des parcours
-            Log.d("Accueil", "Tous les parcours non envoyés ont été traités.");
-            deleteFile("parcoursTemp");
-        } catch (JSONException | IOException e) {
-            Log.e("Accueil", "Erreur lors de la lecture ou de l'envoi des parcours non envoyés", e);
+            reader.close();
+
+        } catch (FileNotFoundException e) {
+            Log.d("Accueil", "Aucun parcours à envoyer.");
+        } catch (IOException e) {
+            Log.e("Accueil", "Erreur lors de la lecture du fichier des parcours", e);
         }
     }
 
 
-    private void sendToApi(JSONObject jsonParcours) {
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
-                response -> {
-                    // Log pour confirmer le succès de l'envoi
-                    Log.d("Accueil", "Parcours envoyé avec succès à l'API.");
-                }, error -> {
-            // Log en cas d'erreur de l'API
-            Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
-        });
 
-        requestQueue.add(request);
+    private void sendParcoursToApi() {
+        for (int i = 0; i < parcoursList.size(); i++) {
+            final int index = i;
+            JSONObject jsonParcours = parcoursList2.get(i);
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
+                    response -> {
+                        // Parcours envoyé avec succès, le retirer de la liste
+                        parcoursList.remove(index);
+                        if (parcoursList.isEmpty()) {
+                            // Tous les parcours ont été envoyés, on peut supprimer le fichier
+                            deleteFile("parcoursTemp");
+                            Log.d("Accueil", "Tous les parcours ont été envoyés, fichier supprimé.");
+                        }
+                    }, error -> {
+                Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
+                // Gestion des erreurs d'envoi ici (par exemple, réessayer plus tard)
+            });
+
+            requestQueue.add(request);
+        }
     }
+
 
 
     /** Crée un toast pour afficher l'erreur. */
     private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 
