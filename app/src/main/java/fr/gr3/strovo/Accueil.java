@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -39,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -140,12 +144,20 @@ public class Accueil extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 this::couseActivityDone);
 
-        try {
-            unsentFiles();
-        } catch (FileNotFoundException ignored) {
-        } catch (Exception ignored) {
+        onResume();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (isNetworkAvailable()) {
+            loadParcoursFromFile();
+            sendParcoursToApi();
 
         }
+        // Appelle la méthode pour récupérer les données de l'API
+        getParcoursFromApi();
     }
 
 
@@ -290,14 +302,6 @@ public class Accueil extends AppCompatActivity {
             clickSaveParcours(lancerParcoursButton);
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Appelle la méthode pour récupérer les données de l'API
-        getParcoursFromApi();
-    }
 
     @Override
     protected void onDestroy() {
@@ -625,34 +629,60 @@ public class Accueil extends AppCompatActivity {
         startActivity(intention);
     }
 
-    private void unsentFiles() throws FileNotFoundException {
+    private List<JSONObject> parcoursList2 = new ArrayList<>();
 
+    private void loadParcoursFromFile() {
 
-        InputStreamReader fichier =
-                new InputStreamReader(openFileInput("parcoursTemp"));
-        BufferedReader fichierTexte = new BufferedReader(fichier);
-        String ligne;
         try {
-            while ((ligne = fichierTexte.readLine()) != null) {
-                // Créer un JSONObject à partir de la ligne
-                JSONObject jsonParcours = new JSONObject(ligne);
-                sendToApi(jsonParcours);
+            FileInputStream fis = openFileInput("parcoursTemp");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+            String ligne;
+            while ((ligne = reader.readLine()) != null) {
+                try {
+                    JSONObject jsonParcours = new JSONObject(ligne);
+                    parcoursList2.add(jsonParcours);
+                } catch (JSONException e) {
+                    Log.e("Accueil", "Erreur lors de la conversion de la ligne en JSONObject", e);
+                }
             }
-            deleteFile("parcoursTemp");
-        } catch (JSONException | IOException e) {
-            e.printStackTrace();
+            reader.close();
+
+        } catch (FileNotFoundException e) {
+            Log.d("Accueil", "Aucun parcours à envoyer.");
+        } catch (IOException e) {
+            Log.e("Accueil", "Erreur lors de la lecture du fichier des parcours", e);
         }
     }
 
 
-    private void sendToApi(JSONObject jsonParcours) {
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
-                response -> {
+    private void sendParcoursToApi() {
+        for (int i = 0; i < parcoursList2.size(); i++) {
+            final int index = i;
+            JSONObject jsonParcours = parcoursList2.get(i);
 
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
+                    response -> {
+                        // Parcours envoyé avec succès, le retirer de la liste
+                        parcoursList2.remove(index);
+                        if (parcoursList2.isEmpty()) {
+                            // Tous les parcours ont été envoyés, on peut supprimer le fichier
+                            deleteFile("parcoursTemp");
+                            Log.d("Accueil", "Tous les parcours ont été envoyés, fichier supprimé.");
+                        }
+                    }, error -> {
+                Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
+                // Gestion des erreurs d'envoi ici (par exemple, réessayer plus tard)
+            });
 
-                }, error -> {
-            // En cas d'erreur de l'API, cette méthode est appelée
-        });
+            requestQueue.add(request);
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 
