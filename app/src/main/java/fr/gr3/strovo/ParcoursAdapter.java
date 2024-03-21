@@ -8,7 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import fr.gr3.strovo.api.model.Parcours;
 
@@ -76,7 +78,11 @@ public class ParcoursAdapter extends ArrayAdapter<Parcours> {
         }
         // on place dans les 2 TextView les valeurs de l'item à afficher
         sauve.nomParcours.setText(parcours.getName());
-        sauve.dateHeure.setText(parcours.getDate().toString());
+
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        String formattedDate = sdf.format(parcours.getDate());
+        sauve.dateHeure.setText(formattedDate);
         return uneVue;
     }
 }

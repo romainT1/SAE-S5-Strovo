@@ -180,6 +180,7 @@ public class Accueil extends AppCompatActivity {
         if (error.networkResponse != null && error.networkResponse.statusCode == 403) {
             finish(); // Renvoie vers la page de connexion
         } else {
+            adapter.clear();
             emptyParcoursText.setVisibility(View.VISIBLE);
         }
     }
@@ -413,6 +414,12 @@ public class Accueil extends AppCompatActivity {
                                     dateMax != null && date.getTime() <= dateMax.getTime()) {
                                 parcoursToShow.add(parcours);
                             }
+                        }
+
+                        if(parcoursToShow.size() < 1) {
+                            emptyParcoursText.setVisibility(View.VISIBLE);
+                        } else {
+                            emptyParcoursText.setVisibility(View.INVISIBLE);
                         }
 
                         parcoursList.clear();
