@@ -148,6 +148,19 @@ public class Accueil extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            unsentFiles();
+        } catch (Exception e) {
+            Log.e("Accueil", "Erreur lors de l'appel à unsentFiles", e);
+        }
+        // Appelle la méthode pour récupérer les données de l'API
+        getParcoursFromApi();
+    }
+
+
 
 
 
@@ -317,19 +330,6 @@ public class Accueil extends AppCompatActivity {
         }
     };
 
-
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-
-
-
-        // Appelle la méthode pour récupérer les données de l'API
-        getParcoursFromApi();
-    }
 
 
 
@@ -733,6 +733,7 @@ public class Accueil extends AppCompatActivity {
 
 
     private void unsentFiles() throws FileNotFoundException {
+        Log.d("Accueil", "Appel de unsentFiles()");
         InputStreamReader fichier = new InputStreamReader(openFileInput("parcoursTemp"));
         BufferedReader fichierTexte = new BufferedReader(fichier);
         String ligne;
