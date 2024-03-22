@@ -4,8 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -39,6 +42,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -48,8 +52,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.StrovoApi;
@@ -140,12 +148,20 @@ public class Accueil extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 this::couseActivityDone);
 
-        try {
-            unsentFiles();
-        } catch (FileNotFoundException ignored) {
-        } catch (Exception ignored) {
+        onResume();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (isNetworkAvailable()) {
+            loadParcoursFromFile();
+            sendParcoursToApi();
 
         }
+        // Appelle la méthode pour récupérer les données de l'API
+        getParcoursFromApi();
     }
 
 
@@ -290,14 +306,6 @@ public class Accueil extends AppCompatActivity {
             clickSaveParcours(lancerParcoursButton);
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Appelle la méthode pour récupérer les données de l'API
-        getParcoursFromApi();
-    }
 
     @Override
     protected void onDestroy() {
@@ -625,34 +633,70 @@ public class Accueil extends AppCompatActivity {
         startActivity(intention);
     }
 
-    private void unsentFiles() throws FileNotFoundException {
+    private List<JSONObject> parcoursList2 = new ArrayList<>();
 
+    private void loadParcoursFromFile() {
 
-        InputStreamReader fichier =
-                new InputStreamReader(openFileInput("parcoursTemp"));
-        BufferedReader fichierTexte = new BufferedReader(fichier);
-        String ligne;
         try {
-            while ((ligne = fichierTexte.readLine()) != null) {
-                // Créer un JSONObject à partir de la ligne
-                JSONObject jsonParcours = new JSONObject(ligne);
-                sendToApi(jsonParcours);
+            FileInputStream fis = openFileInput("parcoursTemp");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+
+            String ligne;
+            while ((ligne = reader.readLine()) != null) {
+                try {
+                    JSONObject jsonParcours = new JSONObject(ligne);
+                    parcoursList2.add(jsonParcours);
+                } catch (JSONException e) {
+                    Log.e("Accueil", "Erreur lors de la conversion de la ligne en JSONObject", e);
+                }
             }
-            deleteFile("parcoursTemp");
-        } catch (JSONException | IOException e) {
-            e.printStackTrace();
+            reader.close();
+
+        } catch (FileNotFoundException e) {
+            Log.d("Accueil", "Aucun parcours à envoyer.");
+        } catch (IOException e) {
+            Log.e("Accueil", "Erreur lors de la lecture du fichier des parcours", e);
         }
     }
 
+    private void sendParcoursToApi() {
+        List<JSONObject> parcoursToRemove = parcoursList2;
 
-    private void sendToApi(JSONObject jsonParcours) {
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
-                response -> {
+        for (JSONObject jsonParcours : parcoursToRemove) {
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
+                    response -> {
+                        parcoursList2.remove(jsonParcours);
+                    }, error -> {
+                        Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
+                    }) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    return createAuthorizationHeader(token);
+                }
+            };
+
+            requestQueue.add(request);
+        }
+        parcoursList2.clear();
+        deleteFile("parcoursTemp");
+        Log.d("Accueil", "Tous les parcours ont été envoyés, fichier supprimé.");
+
+    }
 
 
-                }, error -> {
-            // En cas d'erreur de l'API, cette méthode est appelée
-        });
+
+
+
+    public Map<String, String> createAuthorizationHeader(String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", token);
+        return headers;
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 

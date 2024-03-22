@@ -218,7 +218,7 @@ public class StrovoApi {
      * @param token jeton de connexion api
      * @return
      */
-    private Map<String, String> createAuthorizationHeader(String token) {
+    public Map<String, String> createAuthorizationHeader(String token) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", token);
         return headers;
