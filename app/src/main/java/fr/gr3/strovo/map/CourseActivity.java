@@ -455,16 +455,24 @@ public class CourseActivity extends AppCompatActivity {
 
     private void saveInFile(){
         try {
-            OutputStream fichier = null;
+            // Récupère le parcours actuel.
             Parcours parcours = parcoursManager.getParcours();
-            fichier = openFileOutput("parcoursTemp", Context.MODE_PRIVATE);
             Log.d("CourseActivity", "Sauvegarde du parcours en cours...");
 
+            // Convertit le parcours en JSON.
             JSONObject jsonParcours = parcours.toJson();
 
-            fichier.write(jsonParcours.toString().getBytes());
+            // Ouvre le fichier en mode append.
+            FileOutputStream fichier = openFileOutput("parcoursTemp", Context.MODE_APPEND);
+
+            // Écrit le JSON dans le fichier.
+            String jsonText = jsonParcours.toString() + "\n"; // Ajoute un saut de ligne pour séparer les entrées.
+            fichier.write(jsonText.getBytes());
+
+            // Ferme le fichier.
             fichier.close();
-            // Log pour confirmer la sauvegarde
+
+            // Log pour confirmer la sauvegarde.
             Log.d("CourseActivity", "Parcours sauvegardé avec succès.");
             switchToAccueil(parcours.getId());
         } catch (FileNotFoundException e) {

@@ -52,8 +52,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.StrovoApi;
@@ -655,34 +659,33 @@ public class Accueil extends AppCompatActivity {
         }
     }
 
-
     private void sendParcoursToApi() {
-        for (int i = 0; i < parcoursList2.size(); i++) {
-            final int index = i;
-            JSONObject jsonParcours = parcoursList2.get(i);
+        List<JSONObject> parcoursToRemove = parcoursList2;
+
+        for (JSONObject jsonParcours : parcoursToRemove) {
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
                     response -> {
-                        // Parcours envoyé avec succès, le retirer de la liste
-                        parcoursList2.remove(index);
-                        if (parcoursList2.isEmpty()) {
-                            // Tous les parcours ont été envoyés, on peut supprimer le fichier
-                            deleteFile("parcoursTemp");
-                            Log.d("Accueil", "Tous les parcours ont été envoyés, fichier supprimé.");
-                        }
+                        parcoursList2.remove(jsonParcours);
                     }, error -> {
-                Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
-                // Gestion des erreurs d'envoi ici (par exemple, réessayer plus tard)
-            }) {
+                        Log.e("Accueil", "Erreur lors de l'envoi du parcours à l'API", error);
+                    }) {
                 @Override
                 public Map<String, String> getHeaders() {
                     return createAuthorizationHeader(token);
                 }
             };
 
-
             requestQueue.add(request);
         }
+        parcoursList2.clear();
+        deleteFile("parcoursTemp");
+        Log.d("Accueil", "Tous les parcours ont été envoyés, fichier supprimé.");
+
     }
+
+
+
+
 
     public Map<String, String> createAuthorizationHeader(String token) {
         Map<String, String> headers = new HashMap<>();
