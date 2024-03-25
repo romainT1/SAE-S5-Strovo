@@ -1,4 +1,4 @@
-package fr.gr3.strovo.map;
+package fr.gr3.strovo.utils.parcours;
 
 import android.location.Location;
 

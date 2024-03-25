@@ -52,11 +52,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fr.gr3.strovo.utils.ParcoursAdapter;
+import fr.gr3.strovo.utils.parcours.ParcoursAdapter;
 import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.Parcours;
-import fr.gr3.strovo.map.CourseActivity;
 import fr.gr3.strovo.utils.Keys;
 
 /**

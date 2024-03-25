@@ -1,4 +1,4 @@
-package fr.gr3.strovo.utils;
+package fr.gr3.strovo.utils.parcours;
 
 import android.content.Context;
 import android.view.LayoutInflater;

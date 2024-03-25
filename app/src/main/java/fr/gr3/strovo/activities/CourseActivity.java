@@ -1,4 +1,4 @@
-package fr.gr3.strovo.map;
+package fr.gr3.strovo.activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -49,6 +49,7 @@ import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.InterestPoint;
 import fr.gr3.strovo.api.model.Parcours;
+import fr.gr3.strovo.utils.parcours.ParcoursManager;
 import fr.gr3.strovo.utils.Keys;
 
 public class CourseActivity extends AppCompatActivity {
