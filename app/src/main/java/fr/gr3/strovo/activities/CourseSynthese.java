@@ -44,11 +44,6 @@ import fr.gr3.strovo.utils.Keys;
 public class CourseSynthese extends AppCompatActivity {
 
     /**
-     * Clé de l'identifiant du parcours.
-     */
-    public static final String PARCOURS_ID = "PARCOURS_ID";
-
-    /**
      * Vue qui affiche la carte.
      */
     private MapView map;

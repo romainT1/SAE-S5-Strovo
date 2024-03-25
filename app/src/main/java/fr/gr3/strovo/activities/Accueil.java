@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -73,14 +72,8 @@ public class Accueil extends AppCompatActivity {
     /** Copie de parcoursList */
     private List<Parcours> parcoursListOrigine;
 
-    /** Composant graphique du bouton de filtre */
-    private Button filterButton;
-
     /** Composant graphique de la liste des parcours */
     private ListView listViewParcours;
-
-    /** Composant graphique du bouton qui lance un enregistrement de parcours */
-    private Button lancerParcoursButton;
 
     /** Composant graphique du choix de la date dans le filtre */
     private DatePickerDialog picker;
@@ -94,29 +87,11 @@ public class Accueil extends AppCompatActivity {
     /** Adaptateur pour la liste des parcours */
     private ParcoursAdapter adapter;
 
-    /** Nom du parcours */
-    private String nameParcours;
-
-    /** Intervalle des dates des parcours */
-    private Date[] dateIntervalle;
-
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;
 
-    /** Handler pour gérer le délai d'appel à l'API */
-    private Handler handler = new Handler();
-
-    /** Pour gérer le délai de l'appel à l'API */
-    private Runnable runnable;
-
-    /** Handler pour gérer le délai sur le clic du bouton */
-    private Handler handlerButton;
-
     /** Lanceur de l'activité course */
     private ActivityResultLauncher<Intent> courseActivityLauncher;
-
-    /** Définit le status du clic sur le bouton */
-    private boolean longClickDetected;
 
     /** Token de connexion de l'utilisateur */
     private String token;
@@ -266,9 +241,7 @@ public class Accueil extends AppCompatActivity {
     private void initializeViews() {
         // Initialisation des composants graphiques
         rechercheNom = findViewById(R.id.search_view);
-        filterButton = findViewById(R.id.filter_button);
         listViewParcours = findViewById(R.id.list_view);
-        lancerParcoursButton = findViewById(R.id.floating_action_button);
         emptyParcoursText = findViewById(R.id.text_empty_parcours);
         emptyParcoursText.setVisibility(View.INVISIBLE);
 
@@ -292,15 +265,6 @@ public class Accueil extends AppCompatActivity {
         // Configuration de l'écouteur du clic sur un élément de la liste
         itemListListener();
     }
-
-    private Runnable longClickRunnable = new Runnable() {
-        @Override
-        public void run() {
-            // Si le bouton est toujours enfoncé après 3 secondes
-            longClickDetected = true;
-            clickSaveParcours(lancerParcoursButton);
-        }
-    };
 
     @Override
     protected void onDestroy() {

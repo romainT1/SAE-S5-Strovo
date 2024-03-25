@@ -1,7 +1,5 @@
 package fr.gr3.strovo.map;
 
-import static java.lang.Math.round;
-
 import android.location.Location;
 
 import java.util.ArrayList;
