@@ -340,12 +340,11 @@ public class CourseActivity extends AppCompatActivity {
         Marker marker = new Marker(map);
         marker.setPosition(interestPoint.getPoint());
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setTitle(interestPoint.getName());// TODO voir si on affiche le titre ou la description
+        marker.setTitle(interestPoint.getName());
         marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {
                 Toast.makeText(getApplicationContext(), interestPoint.getName() + ": " + interestPoint.getDescription(), Toast.LENGTH_SHORT).show();
-                // TODO showInterestPointPopup(interestpoint) un truc comme ça
                 return true;
             }
         });
@@ -373,7 +372,6 @@ public class CourseActivity extends AppCompatActivity {
         confirmer.setOnClickListener(v -> {
             // Vérification les permissions
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO afficher une popup ?
                 return;
             }
 
