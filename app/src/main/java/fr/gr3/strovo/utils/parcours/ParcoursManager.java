@@ -1,6 +1,4 @@
-package fr.gr3.strovo.map;
-
-import static java.lang.Math.round;
+package fr.gr3.strovo.utils.parcours;
 
 import android.location.Location;
 

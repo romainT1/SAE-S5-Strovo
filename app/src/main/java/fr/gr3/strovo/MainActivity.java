@@ -1,6 +1,5 @@
 package fr.gr3.strovo;
 
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -27,7 +26,6 @@ import fr.gr3.strovo.utils.PasswordHasher;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.utils.Keys;
 
-
 /**
  * Activité principale, page de connexion.
  */
@@ -39,10 +37,8 @@ public class MainActivity extends AppCompatActivity {
     /** Champ de saisie de l'adresse mail*/
     private EditText email;
 
-
     /** Champ de saisie du mot de passe */
     private EditText motDePasse;
-
 
     /** Queue pour effectuer la requête HTTP */
     private RequestQueue requestQueue;

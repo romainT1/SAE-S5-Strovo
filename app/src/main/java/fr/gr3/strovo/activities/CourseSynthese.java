@@ -44,11 +44,6 @@ import fr.gr3.strovo.utils.Keys;
 public class CourseSynthese extends AppCompatActivity {
 
     /**
-     * Clé de l'identifiant du parcours.
-     */
-    public static final String PARCOURS_ID = "PARCOURS_ID";
-
-    /**
      * Vue qui affiche la carte.
      */
     private MapView map;
@@ -168,7 +163,7 @@ public class CourseSynthese extends AppCompatActivity {
         Marker marker = new Marker(map);
         marker.setPosition(interestPoint.getPoint());
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        marker.setTitle(interestPoint.getName());// TODO voir si on affiche le titre ou la description
+        marker.setTitle(interestPoint.getName());
         marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker, MapView mapView) {

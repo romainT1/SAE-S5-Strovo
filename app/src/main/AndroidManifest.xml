@@ -36,7 +36,7 @@
             android:exported="true">
         </activity>
         <activity
-            android:name=".map.CourseActivity"
+            android:name=".activities.CourseActivity"
             android:exported="true">
         </activity>
         <activity
