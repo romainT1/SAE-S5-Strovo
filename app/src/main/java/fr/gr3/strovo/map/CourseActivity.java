@@ -204,14 +204,13 @@ public class CourseActivity extends AppCompatActivity {
         if(parcours.getCoordinates().size() == 0){
             switchToAccueil(null);
             showError("Erreur géolocalisation : Le parcours n'a pas été enregistré");
-        }
-        try {
-            addParcoursToApi();
-        } catch (JSONException ignore) {
+        } else {
+            try {
+                addParcoursToApi();
+            } catch (JSONException ignore) {
 
+            }
         }
-
-        // TODO arreter le traceur
     }
 
     /** Initialise l'écouteur de localisation de l'utilisateur.
