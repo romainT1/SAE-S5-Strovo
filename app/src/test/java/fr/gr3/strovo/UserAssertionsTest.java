@@ -3,7 +3,9 @@ package fr.gr3.strovo;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** Tests de la classe {@link fr.gr3.strovo.UserAssertions} */
+import fr.gr3.strovo.utils.UserAssertions;
+
+/** Tests de la classe {@link UserAssertions} */
 public class UserAssertionsTest {
 
     @Test

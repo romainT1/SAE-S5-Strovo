@@ -28,11 +28,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Accueil"
+            android:name=".activities.Accueil"
             android:exported="true">
         </activity>
         <activity
-            android:name=".Inscription"
+            android:name=".activities.Inscription"
             android:exported="true">
         </activity>
         <activity
@@ -40,7 +40,7 @@
             android:exported="true">
         </activity>
         <activity
-            android:name=".CourseSynthese"
+            android:name=".activities.CourseSynthese"
             android:exported="true">
         </activity>
     </application>

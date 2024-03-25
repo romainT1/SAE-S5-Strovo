@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -22,6 +21,9 @@ import org.json.JSONObject;
 
 import java.security.NoSuchAlgorithmException;
 
+import fr.gr3.strovo.activities.Accueil;
+import fr.gr3.strovo.activities.Inscription;
+import fr.gr3.strovo.utils.PasswordHasher;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.utils.Keys;
 

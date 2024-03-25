@@ -1,11 +1,14 @@
 package fr.gr3.strovo.map;
 
+import static java.lang.Math.round;
+
 import android.location.Location;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import fr.gr3.strovo.api.model.InterestPoint;
 import fr.gr3.strovo.api.model.Parcours;
 
 /**
@@ -120,7 +123,9 @@ public class ParcoursManager {
      */
     private float calculateSpeed(float time, double distance) {
         float timeHour = time / 1000 / 3600;
-        return (float) (distance / 1000 / timeHour); 
+        float speed = (float) (distance / 1000 / timeHour);
+        speed = Math.round(speed * 100.0) / 100.0f;
+        return speed;
     }
 
 

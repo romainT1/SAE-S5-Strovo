@@ -24,10 +24,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -43,20 +40,14 @@ import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import fr.gr3.strovo.CourseSynthese;
 import fr.gr3.strovo.R;
-import fr.gr3.strovo.api.Endpoints;
 import fr.gr3.strovo.api.StrovoApi;
+import fr.gr3.strovo.api.model.InterestPoint;
 import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.utils.Keys;
 
@@ -149,7 +140,6 @@ public class CourseActivity extends AppCompatActivity {
         map.getOverlays().add(myLocationNewOverlay);
 
         parcoursManager.start();
-
         stopParcoursListener();
     }
 
@@ -208,9 +198,13 @@ public class CourseActivity extends AppCompatActivity {
      */
     public void clicStopParcours(View view) {
         parcoursManager.stop();
-
+        Parcours parcours = parcoursManager.getParcours();
         locationListener = null;
         locationManager = null;
+        if(parcours.getCoordinates().size() == 0){
+            switchToAccueil(null);
+            showError("Erreur géolocalisation : Le parcours n'a pas été enregistré");
+        }
         try {
             addParcoursToApi();
         } catch (JSONException ignore) {
@@ -241,10 +235,6 @@ public class CourseActivity extends AppCompatActivity {
                 }
                 // Centre la map sur la position de l'utilisateur
                 map.getController().setCenter(point);
-
-                Toast.makeText(getApplicationContext(), "Changement position", Toast.LENGTH_SHORT).show();
-
-
             }
 
             @Override

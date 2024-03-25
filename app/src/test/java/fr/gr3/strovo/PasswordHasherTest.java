@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
 
+import fr.gr3.strovo.utils.PasswordHasher;
+
 public class PasswordHasherTest {
 
     @Test

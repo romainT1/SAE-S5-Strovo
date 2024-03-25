@@ -1,4 +1,4 @@
-package fr.gr3.strovo.map;
+package fr.gr3.strovo.api.model;
 
 import org.json.JSONArray;
 import org.json.JSONException;

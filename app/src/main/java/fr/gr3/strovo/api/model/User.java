@@ -3,8 +3,6 @@ package fr.gr3.strovo.api.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import fr.gr3.strovo.PasswordHasher;
-
 /** Représente un utilisateur. */
 public class User {
 

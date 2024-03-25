@@ -1,4 +1,4 @@
-package fr.gr3.strovo;
+package fr.gr3.strovo.utils;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.model.Parcours;
 
 public class ParcoursAdapter extends ArrayAdapter<Parcours> {

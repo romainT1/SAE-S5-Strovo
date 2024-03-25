@@ -1,4 +1,4 @@
-package fr.gr3.strovo;
+package fr.gr3.strovo.activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -27,10 +27,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -52,14 +50,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.utils.ParcoursAdapter;
+import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.Parcours;
 import fr.gr3.strovo.map.CourseActivity;
@@ -663,7 +658,7 @@ public class Accueil extends AppCompatActivity {
         List<JSONObject> parcoursToRemove = parcoursList2;
 
         for (JSONObject jsonParcours : parcoursToRemove) {
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Endpoints.ADD_PARCOURS, jsonParcours,
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, StrovoApi.ADD_PARCOURS, jsonParcours,
                     response -> {
                         parcoursList2.remove(jsonParcours);
                     }, error -> {

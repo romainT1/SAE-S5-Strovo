@@ -1,4 +1,4 @@
-package fr.gr3.strovo;
+package fr.gr3.strovo.activities;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,11 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -33,15 +29,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
-import fr.gr3.strovo.api.Endpoints;
+import fr.gr3.strovo.R;
 import fr.gr3.strovo.api.StrovoApi;
 import fr.gr3.strovo.api.model.Parcours;
-import fr.gr3.strovo.map.InterestPoint;
+import fr.gr3.strovo.api.model.InterestPoint;
 import fr.gr3.strovo.utils.Keys;
 
 /**
